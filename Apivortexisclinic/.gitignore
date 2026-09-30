@@ -1,0 +1,45 @@
+# Segredos — nunca versionar
+.env
+.env.*
+!.env.example
+!.env.test.example
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credenciais*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Banco e dumps (podem conter dado de paciente)
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+dumps/
+backups/
+
+# Logs
+*.log
+logs/
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Documentos emitidos (cifrados, mas fora do repositório de qualquer forma)
+arquivos/

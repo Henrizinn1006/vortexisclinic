@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-vertical="psicologia" data-privacy="off">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vortexis Clinic · Painel</title>
+<meta name="description" content="Painel de gestão para psicólogos — Vortexis Clinic.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#12314f">
+<meta name="color-scheme" content="light">
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="64x64" href="assets/images/favicon.png">
+<link rel="apple-touch-icon" href="assets/images/icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Clinic">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/layout.css">
+<link rel="stylesheet" href="assets/css/components.css">
+<link rel="stylesheet" href="assets/css/views.css">
+<link rel="stylesheet" href="assets/css/auth.css">
+</head>
+
+<body>
+
+<a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+
+<div class="app">
+  <!-- Navegação lateral (vira gaveta no celular) -->
+  <aside class="sidebar" aria-label="Navegação principal"></aside>
+  <div class="scrim" hidden-if-desktop></div>
+
+  <div class="app__main">
+    <header class="topbar"></header>
+
+    <!-- Cada rota escreve aqui -->
+    <div data-aviso-email></div>
+    <main class="content" id="conteudo" data-outlet>
+      <noscript>
+        <div class="card"><div class="card__body">
+          <h1>Ative o JavaScript</h1>
+          <p class="muted">O painel da Vortexis Clinic precisa de JavaScript para funcionar.</p>
+        </div></div>
+      </noscript>
+    </main>
+  </div>
+</div>
+
+<!-- Entrada: login, cadastro e escolha de workspace.
+     Fica fora do .app — enquanto não há sessão, o painel nem é montado. -->
+<div data-auth-outlet></div>
+
+<!-- Navegação inferior (celular) -->
+<nav class="bottomnav" aria-label="Navegação rápida"></nav>
+
+<!-- ordem importa: config → core → dados → services → componentes → telas → app -->
+<script src="assets/js/config/app.config.js"></script>
+<script src="assets/js/types/entities.js"></script>
+<script src="assets/js/core/safe.js"></script>
+<script src="assets/js/core/api.js"></script>
+<script src="assets/js/core/dom.js"></script>
+<script src="assets/js/core/terms.js"></script>
+<script src="assets/js/core/format.js"></script>
+<script src="assets/js/core/store.js"></script>
+<script src="assets/js/core/toast.js"></script>
+<script src="assets/js/core/session.js"></script>
+<script src="assets/js/core/router.js"></script>
+
+<script src="assets/js/domain/metrics.js"></script>
+
+
+<script src="assets/js/services/mapa.js"></script>
+<script src="assets/js/services/base.js"></script>
+<script src="assets/js/services/pacientes.service.js"></script>
+<script src="assets/js/services/atendimentos.service.js"></script>
+<script src="assets/js/services/financeiro.service.js"></script>
+<script src="assets/js/services/prontuario.service.js"></script>
+<script src="assets/js/services/equipe.service.js"></script>
+<script src="assets/js/services/agenda.service.js"></script>
+<script src="assets/js/services/documentos.service.js"></script>
+<script src="assets/js/services/privacidade.service.js"></script>
+<script src="assets/js/services/configuracoes.service.js"></script>
+<script src="assets/js/services/dashboard.service.js"></script>
+
+<script src="assets/js/components/ui.js"></script>
+<script src="assets/js/components/modal.js"></script>
+<script src="assets/js/components/form.js"></script>
+<script src="assets/js/components/shell.js"></script>
+
+<script src="assets/js/views/auth.js"></script>
+<script src="assets/js/views/dashboard.js"></script>
+<script src="assets/js/views/agenda.js"></script>
+<script src="assets/js/views/pacientes.js"></script>
+<script src="assets/js/views/atendimentos.js"></script>
+<script src="assets/js/views/financeiro.js"></script>
+<script src="assets/js/views/configuracoes.js"></script>
+<script src="assets/js/views/equipe.js"></script>
+<script src="assets/js/views/privacidade.js"></script>
+<script src="assets/js/views/basicas.js"></script>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>

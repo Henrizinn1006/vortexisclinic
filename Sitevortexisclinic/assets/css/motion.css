@@ -1,0 +1,348 @@
+/* =============================================================
+   SISTEMA DE MOVIMENTO
+   Regras:
+   - nada anima antes de o JS marcar <html class="js-motion">;
+   - sem JS, tudo aparece normalmente;
+   - prefers-reduced-motion desliga tudo no fim do arquivo.
+   ============================================================= */
+
+/* ---------- Estados iniciais (só com JS ativo) ---------- */
+/* Usa animation + fill-mode: o estado final sempre "gruda",
+   mesmo se algum frame se perder. */
+.js-motion [data-anim] { opacity: 0; will-change: transform, opacity; }
+.js-motion [data-anim].is-in {
+  animation-duration: 780ms;
+  animation-timing-function: var(--ease-out);
+  animation-delay: var(--anim-delay, 0ms);
+  animation-fill-mode: both;
+  will-change: auto;
+}
+.js-motion [data-anim="up"].is-in    { animation-name: a-up; }
+.js-motion [data-anim="down"].is-in  { animation-name: a-down; }
+.js-motion [data-anim="left"].is-in  { animation-name: a-left; }
+.js-motion [data-anim="right"].is-in { animation-name: a-right; }
+.js-motion [data-anim="scale"].is-in { animation-name: a-scale; animation-duration: 900ms; }
+.js-motion [data-anim="mask"].is-in  { animation-name: a-mask; animation-duration: 900ms; }
+.js-motion [data-anim="blur"].is-in  { animation-name: a-blur; }
+
+@keyframes a-up    { from { opacity: 0; transform: translate3d(0, 26px, 0); }  to { opacity: 1; transform: none; } }
+@keyframes a-down  { from { opacity: 0; transform: translate3d(0, -20px, 0); } to { opacity: 1; transform: none; } }
+@keyframes a-left  { from { opacity: 0; transform: translate3d(28px, 0, 0); }  to { opacity: 1; transform: none; } }
+@keyframes a-right { from { opacity: 0; transform: translate3d(-28px, 0, 0); } to { opacity: 1; transform: none; } }
+@keyframes a-scale { from { opacity: 0; transform: scale(0.94); }              to { opacity: 1; transform: none; } }
+@keyframes a-blur  { from { opacity: 0; filter: blur(10px); transform: translate3d(0, 14px, 0); } to { opacity: 1; filter: none; transform: none; } }
+@keyframes a-mask  { from { opacity: 0; clip-path: inset(0 0 105% 0); } to { opacity: 1; clip-path: inset(0 0 -25% 0); } }
+
+/* ---------- Barra de progresso de leitura ---------- */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--vc-blue) 0%, var(--vc-green) 100%);
+  z-index: calc(var(--z-header) + 5);
+  pointer-events: none;
+}
+
+/* ---------- Header ---------- */
+.site-header { transition: background var(--t-base), border-color var(--t-base), box-shadow var(--t-base), min-height var(--t-base); }
+.site-header__inner { transition: min-height 320ms var(--ease-out); }
+.site-header.is-stuck .site-header__inner { min-height: 62px; }
+.site-header.is-stuck .logo__mark { width: 34px; }
+.site-header.is-stuck .logo__wordmark { height: 24px; }
+.logo__mark, .logo__wordmark { transition: width 320ms var(--ease-out), height 320ms var(--ease-out), transform 400ms var(--ease-out); }
+.logo:hover .logo__mark { transform: rotate(-38deg) scale(1.04); }
+
+/* Sublinhado animado da navegação */
+.nav__link { position: relative; }
+.nav__link::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem; right: 0.75rem; bottom: 4px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--vc-blue), var(--vc-green));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 340ms var(--ease-out);
+}
+.nav__link:hover::after,
+.nav__link.is-active::after { transform: scaleX(1); }
+
+/* Menu mobile em cascata */
+.mobile-nav .nav__link,
+.mobile-nav .mobile-nav__actions {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 380ms var(--ease-out), transform 380ms var(--ease-out);
+}
+.mobile-nav.is-open .nav__link,
+.mobile-nav.is-open .mobile-nav__actions { opacity: 1; transform: none; }
+.mobile-nav.is-open .nav__link:nth-child(1) { transition-delay: 40ms; }
+.mobile-nav.is-open .nav__link:nth-child(2) { transition-delay: 80ms; }
+.mobile-nav.is-open .nav__link:nth-child(3) { transition-delay: 120ms; }
+.mobile-nav.is-open .nav__link:nth-child(4) { transition-delay: 160ms; }
+.mobile-nav.is-open .nav__link:nth-child(5) { transition-delay: 200ms; }
+.mobile-nav.is-open .nav__link:nth-child(6) { transition-delay: 240ms; }
+.mobile-nav.is-open .mobile-nav__actions { transition-delay: 280ms; }
+
+/* ---------- Botões ---------- */
+.btn { position: relative; overflow: hidden; isolation: isolate; }
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-120%) skewX(-18deg);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+  transition: transform 720ms var(--ease-out);
+  z-index: -1;
+}
+.btn:hover::before { transform: translateX(120%) skewX(-18deg); }
+.btn--outline::before { background: linear-gradient(90deg, transparent, rgba(36, 99, 168, 0.12), transparent); }
+.btn__icon { transition: transform 320ms var(--ease-out); }
+.btn:hover .btn__icon { transform: translateX(4px); }
+
+.btn--arrow::after {
+  content: "→";
+  font-size: 1em;
+  transition: transform 320ms var(--ease-out);
+}
+.btn--arrow:hover::after { transform: translateX(4px); }
+
+/* ---------- Cards: brilho que segue o cursor ---------- */
+.card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 420ms var(--ease-out), box-shadow 420ms var(--ease-out), border-color 420ms var(--ease-out);
+}
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 420ms var(--ease-out);
+  background: radial-gradient(340px circle at var(--mx, 50%) var(--my, 0%),
+              color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 62%);
+  pointer-events: none;
+}
+.card--hover:hover { transform: translateY(-6px); }
+.card--hover:hover::after { opacity: 1; }
+
+/* ---------- Hero ---------- */
+.hero__aurora {
+  position: absolute;
+  inset: -30% -10% auto -10%;
+  height: 120%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(70px);
+  opacity: 0.75;
+}
+.hero__aurora i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+  animation: drift 22s var(--ease-io) infinite alternate;
+}
+.hero__aurora i:nth-child(1) { width: 46vw; height: 34vw; left: 52%; top: 6%;  background: color-mix(in srgb, var(--vc-green-light) 70%, white); }
+.hero__aurora i:nth-child(2) { width: 40vw; height: 30vw; left: -6%; top: 18%; background: color-mix(in srgb, var(--vc-blue-soft) 92%, white); animation-duration: 27s; animation-direction: alternate-reverse; }
+.hero__aurora i:nth-child(3) { width: 26vw; height: 26vw; left: 30%; top: 44%; background: color-mix(in srgb, var(--vc-green-soft) 88%, white); animation-duration: 31s; }
+
+@keyframes drift {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  50%  { transform: translate3d(3vw, -3vw, 0) scale(1.08); }
+  100% { transform: translate3d(-3vw, 2vw, 0) scale(0.96); }
+}
+
+/* Título com revelação por linha */
+.line-mask { display: block; overflow: hidden; padding-bottom: 0.08em; }
+.js-motion .line-mask > span { display: block; }
+.js-motion .line-mask.is-in > span {
+  animation: a-line 950ms var(--ease-out) var(--anim-delay, 0ms) both;
+}
+@keyframes a-line { from { transform: translateY(105%); } to { transform: none; } }
+
+/* ---------- Mockup ---------- */
+.mockup { transform-style: preserve-3d; }
+.app-window {
+  transition: transform 600ms var(--ease-out), box-shadow 600ms var(--ease-out);
+  transform: rotateY(var(--ry, -4deg)) rotateX(var(--rx, 2deg)) translateZ(0);
+}
+.mockup--float .app-window { animation: floaty 7s var(--ease-io) infinite alternate; }
+.phone-float { animation: floaty-2 6s var(--ease-io) infinite alternate; }
+
+@keyframes floaty   { from { translate: 0 -6px; } to { translate: 0 8px; } }
+@keyframes floaty-2 { from { translate: 0 8px; }  to { translate: 0 -8px; } }
+
+.app-chip { position: relative; }
+.app-chip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--vc-green);
+  opacity: 0.35;
+  animation: pulse 2.6s var(--ease-io) infinite;
+}
+@keyframes pulse {
+  0%   { transform: scale(1); opacity: 0.35; }
+  70%  { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* Barras do gráfico crescendo */
+.js-motion .app-chart i { transform-origin: 50% 100%; }
+.js-motion .app-chart.is-in i { animation: a-bar 900ms var(--ease-out) both; }
+.js-motion .app-chart.is-in i:nth-child(1) { animation-delay: 120ms; }
+.js-motion .app-chart.is-in i:nth-child(2) { animation-delay: 220ms; }
+.js-motion .app-chart.is-in i:nth-child(3) { animation-delay: 320ms; }
+.js-motion .app-chart.is-in i:nth-child(4) { animation-delay: 420ms; }
+.js-motion .app-chart.is-in i:nth-child(5) { animation-delay: 520ms; }
+@keyframes a-bar { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+/* Linhas da agenda entrando */
+.js-motion .app-panel.is-in .app-row { animation: a-row 560ms var(--ease-out) both; }
+.js-motion .app-panel.is-in .app-row:nth-child(2) { animation-delay: 140ms; }
+.js-motion .app-panel.is-in .app-row:nth-child(3) { animation-delay: 260ms; }
+.js-motion .app-panel.is-in .app-row:nth-child(4) { animation-delay: 380ms; }
+.js-motion .app-panel.is-in .app-row:nth-child(5) { animation-delay: 500ms; }
+@keyframes a-row { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+
+/* Barras do app com brilho passando */
+.app-row__bar { position: relative; overflow: hidden; }
+.app-row__bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), transparent);
+  animation: sheen 4.5s linear infinite;
+}
+@keyframes sheen { 0%, 60% { transform: translateX(-100%); } 100% { transform: translateX(140%); } }
+
+/* ---------- Numeração / réguas que substituem os ícones ---------- */
+.rule-item { position: relative; padding-left: var(--sp-4); }
+.rule-item::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 4px; bottom: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--vc-blue), var(--vc-green));
+  transform: scaleY(0.35);
+  transform-origin: 50% 0;
+  transition: transform 460ms var(--ease-out);
+}
+.rule-item:hover::before,
+.trust-strip__grid:hover .rule-item::before,
+.is-in.rule-item::before { transform: scaleY(1); }
+
+.num {
+  display: block;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--accent-dark);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--sp-2);
+}
+
+/* ---------- Dispositivos (PWA) ---------- */
+.js-motion .devices .device-group { opacity: 0; }
+.js-motion .devices.is-in .device-group { animation: a-device 760ms var(--ease-out) both; }
+.js-motion .devices.is-in .device-group:nth-child(2) { animation-delay: 130ms; }
+.js-motion .devices.is-in .device-group:nth-child(3) { animation-delay: 260ms; }
+@keyframes a-device { from { opacity: 0; transform: translateY(24px) scale(0.96); } to { opacity: 1; transform: none; } }
+.devices.is-in .device--desktop { animation: floaty 8s var(--ease-io) 1.2s infinite alternate; }
+.devices.is-in .device--tablet  { animation: floaty-2 7s var(--ease-io) 1.4s infinite alternate; }
+.devices.is-in .device--phone   { animation: floaty 6.5s var(--ease-io) 1.6s infinite alternate; }
+
+/* ---------- Roadmap com linha que preenche ---------- */
+.roadmap { position: relative; padding-left: var(--sp-5); }
+.roadmap::before {
+  content: "";
+  position: absolute;
+  left: 6px; top: 10px; bottom: 10px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 2px;
+}
+.roadmap::after {
+  content: "";
+  position: absolute;
+  left: 6px; top: 10px;
+  width: 2px;
+  height: var(--fill, 0%);
+  background: linear-gradient(180deg, var(--vc-green-light), var(--vc-green));
+  border-radius: 2px;
+  transition: height 900ms var(--ease-out);
+}
+.roadmap__item { transition: transform 420ms var(--ease-out), background 420ms var(--ease-out); }
+.roadmap__item:hover { transform: translateX(6px); background: rgba(255, 255, 255, 0.1); }
+
+/* ---------- CTA final com aurora ---------- */
+.cta-card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(closest-side, rgba(40, 166, 122, 0.5), transparent 70%) 20% 30%/55% 55% no-repeat,
+    radial-gradient(closest-side, rgba(36, 99, 168, 0.55), transparent 70%) 80% 70%/60% 60% no-repeat;
+  animation: aurora 16s var(--ease-io) infinite alternate;
+  pointer-events: none;
+}
+@keyframes aurora {
+  from { transform: translate3d(-4%, -3%, 0) rotate(0deg) scale(1); }
+  to   { transform: translate3d(5%, 4%, 0) rotate(8deg) scale(1.12); }
+}
+
+/* ---------- Links do rodapé ---------- */
+.footer__list a { position: relative; }
+.footer__list a::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 320ms var(--ease-out);
+}
+.footer__list a:hover::after { transform: scaleX(1); }
+
+/* ---------- Pills e chips ---------- */
+.feature-pill { transition: transform 300ms var(--ease-out), background 300ms var(--ease-out); }
+.product-card:hover .feature-pill { transform: translateY(-2px); }
+
+/* ---------- Respeito ao movimento reduzido ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .js-motion [data-anim],
+  .js-motion [data-anim].is-in,
+  .js-motion .line-mask > span,
+  .js-motion .line-mask.is-in > span,
+  .js-motion .app-chart.is-in i,
+  .js-motion .app-panel.is-in .app-row,
+  .js-motion .devices .device-group,
+  .js-motion .devices.is-in .device-group {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+  .hero__aurora i,
+  .app-chip::before,
+  .app-row__bar::after,
+  .cta-card::before,
+  .mockup--float .app-window,
+  .phone-float,
+  .devices.is-in .device--desktop,
+  .devices.is-in .device--tablet,
+  .devices.is-in .device--phone { animation: none !important; }
+  .progress-bar { display: none; }
+}

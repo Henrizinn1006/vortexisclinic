@@ -1,0 +1,117 @@
+/* =============================================================
+   VORTEXIS CLINIC — PAINEL
+   Tokens do produto. Herda a paleta da marca (Vortexis Health)
+   e acrescenta o que só existe em produto: densidade, superfícies
+   de app, estados de atendimento e cor por vertical.
+   ============================================================= */
+
+:root {
+  /* ---- Marca ---- */
+  --vc-blue: #2463a8;
+  --vc-blue-dark: #173b63;
+  --vc-blue-700: #1b4b7f;
+  --vc-blue-soft: #e8f0f9;
+  --vc-green: #28a67a;
+  --vc-green-dark: #1e8462;
+  --vc-green-light: #a8e0cf;
+  --vc-green-soft: #e6f6f0;
+
+  /* ---- Superfícies ---- */
+  --bg: #f4f7f9;             /* fundo da área de trabalho */
+  --surface: #ffffff;        /* cards, tabelas, painéis */
+  --surface-2: #f8fbfb;      /* faixas internas, cabeçalho de tabela */
+  --sidebar: #12314f;        /* navegação desktop */
+  --sidebar-hover: rgba(255, 255, 255, 0.08);
+  --sidebar-active: rgba(255, 255, 255, 0.14);
+
+  /* ---- Texto ---- */
+  --text: #16242e;
+  --text-muted: #5b6b77;
+  --text-soft: #8496a2;
+  --text-on-dark: #e8eff5;
+  --text-on-dark-muted: rgba(232, 239, 245, 0.62);
+
+  /* ---- Linhas ---- */
+  --border: #e3ebef;
+  --border-strong: #cddbe3;
+
+  /* ---- Estados semânticos ---- */
+  --ok: #1e8462;         --ok-bg: #e6f6f0;
+  --info: #2463a8;       --info-bg: #e8f0f9;
+  --warn: #a9791a;       --warn-bg: #fdf3e0;
+  --danger: #b4483f;     --danger-bg: #fbeceb;
+  --neutral: #5b6b77;    --neutral-bg: #eef2f4;
+
+  /* Acento do produto (a vertical define). Psicologia: */
+  --accent: #5b7cd8;
+  --accent-dark: #425eae;
+  --accent-light: #c5d1f4;
+  --accent-soft: #eef2fd;
+
+  /* ---- Tipografia ---- */
+  --font: "Inter", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --fs-2xs: 0.69rem;
+  --fs-xs: 0.76rem;
+  --fs-sm: 0.85rem;
+  --fs-base: 0.94rem;
+  --fs-md: 1.05rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: 1.55rem;
+  --fs-2xl: 2rem;
+  --lh: 1.55;
+
+  /* ---- Espaçamento e densidade ---- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 2.75rem;
+  --gutter: clamp(1rem, 0.5rem + 1.6vw, 2rem);
+  --sidebar-w: 250px;
+  --topbar-h: 62px;
+  --bottomnav-h: 60px;
+  --content-max: 1320px;
+  --row-h: 52px;
+
+  /* ---- Raios e sombras ---- */
+  --r-xs: 6px;
+  --r-sm: 9px;
+  --r-md: 13px;
+  --r-lg: 18px;
+  --r-pill: 999px;
+  --sh-xs: 0 1px 2px rgba(18, 49, 79, 0.06);
+  --sh-sm: 0 2px 8px rgba(18, 49, 79, 0.07);
+  --sh-md: 0 8px 24px rgba(18, 49, 79, 0.10);
+  --sh-lg: 0 20px 48px rgba(18, 49, 79, 0.16);
+
+  /* ---- Movimento (discreto: é ferramenta de trabalho) ---- */
+  --ease: cubic-bezier(0.2, 0.8, 0.3, 1);
+  --t-fast: 120ms var(--ease);
+  --t-base: 200ms var(--ease);
+
+  --z-sidebar: 40;
+  --z-topbar: 50;
+  --z-drawer: 60;
+  --z-modal: 80;
+  --z-toast: 90;
+}
+
+/* Cor por vertical: o mesmo painel servirá odontologia, estética…
+   Basta trocar data-vertical no <html>. */
+[data-vertical="psicologia"] {
+  --accent: #5b7cd8; --accent-dark: #425eae; --accent-light: #c5d1f4; --accent-soft: #eef2fd;
+}
+[data-vertical="odontologia"] {
+  --accent: #1a9cc4; --accent-dark: #14789a; --accent-light: #a9e0ee; --accent-soft: #e7f6fa;
+}
+[data-vertical="estetica"] {
+  --accent: #b96a8f; --accent-dark: #97506f; --accent-light: #ecc7d9; --accent-soft: #fbeef4;
+}
+[data-vertical="fisioterapia"] {
+  --accent: #e08a3c; --accent-dark: #bd6e26; --accent-light: #f6d5b1; --accent-soft: #fdf3e8;
+}
+[data-vertical="nutricao"] {
+  --accent: #6aa832; --accent-dark: #538425; --accent-light: #d1e8b5; --accent-soft: #f1f8e8;
+}

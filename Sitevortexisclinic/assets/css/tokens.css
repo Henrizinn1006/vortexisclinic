@@ -1,0 +1,140 @@
+/* =============================================================
+   VORTEXIS CLINIC — Design Tokens
+   Fonte da verdade de cores, tipografia, espacamento e sombras.
+   Nenhum componente deve usar cor "crua" (#hex) fora deste arquivo.
+   ============================================================= */
+
+:root {
+  /* ---- Marca: paleta Vortexis Health ---- */
+  --vc-blue: #2463a8;
+  --vc-blue-dark: #173b63;
+  --vc-blue-600: #1f5691;
+  --vc-blue-soft: #e8f0f9;
+  --vc-green: #28a67a;
+  --vc-green-dark: #1e8462;
+  --vc-green-light: #a8e0cf;
+  --vc-green-soft: #e6f6f0;
+
+  /* ---- Superficies e texto ---- */
+  --vc-bg: #f6faf9;
+  --vc-bg-alt: #eef5f4;
+  --vc-surface: #ffffff;
+  --vc-text: #1c2b33;
+  --vc-text-muted: #5b6b77;
+  --vc-text-soft: #8496a2;
+  --vc-border: #dfeae7;
+  --vc-border-strong: #c9dbd6;
+
+  /* ---- Estados ---- */
+  --vc-success: #4caf78;
+  --vc-warning: #e9b949;
+  --vc-danger: #d96c6c;
+
+  /* ---- Tema ativo (sobrescrito por produto via [data-theme]) ----
+     Use SEMPRE --accent* nos componentes. Assim um produto novo
+     so precisa declarar seu bloco de tema abaixo.                */
+  --accent: var(--vc-green);
+  --accent-dark: var(--vc-green-dark);
+  --accent-light: var(--vc-green-light);
+  --accent-soft: var(--vc-green-soft);
+  --accent-contrast: #ffffff;
+
+  /* ---- Tipografia ---- */
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --fs-xs: 0.78rem;
+  --fs-sm: 0.88rem;
+  --fs-base: 1rem;
+  --fs-md: clamp(1.02rem, 0.98rem + 0.2vw, 1.12rem);
+  --fs-lg: clamp(1.15rem, 1.05rem + 0.5vw, 1.35rem);
+  --fs-xl: clamp(1.4rem, 1.2rem + 1vw, 1.85rem);
+  --fs-2xl: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+  --fs-3xl: clamp(2.1rem, 1.5rem + 2.8vw, 3.4rem);
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-base: 1.65;
+
+  /* ---- Espacamento ---- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+  --sp-8: 4rem;
+  --section-y: clamp(3.5rem, 2rem + 6vw, 6.5rem);
+  --container: 1180px;
+  --container-narrow: 860px;
+  --gutter: clamp(1rem, 0.5rem + 2.5vw, 2rem);
+
+  /* ---- Raios e sombras ---- */
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-pill: 999px;
+  --sh-xs: 0 1px 2px rgba(23, 59, 99, 0.06);
+  --sh-sm: 0 2px 8px rgba(23, 59, 99, 0.06);
+  --sh-md: 0 10px 30px rgba(23, 59, 99, 0.08);
+  --sh-lg: 0 24px 60px rgba(23, 59, 99, 0.12);
+
+  /* ---- Movimento ---- */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast: 140ms var(--ease);
+  --t-base: 240ms var(--ease);
+
+  --z-header: 100;
+  --z-modal: 200;
+}
+
+/* =============================================================
+   TEMAS POR PRODUTO
+   A identidade Vortexis Clinic (azul + verde) permanece.
+   Cada vertical so troca o "accent" da pagina/card.
+   Para um produto novo: adicione um bloco aqui e o campo
+   "theme" em assets/js/data/products.js.
+   ============================================================= */
+
+[data-theme="clinic"] {
+  --accent: var(--vc-green);
+  --accent-dark: var(--vc-green-dark);
+  --accent-light: var(--vc-green-light);
+  --accent-soft: var(--vc-green-soft);
+}
+
+[data-theme="psicologia"] {
+  --accent: #5b7cd8;
+  --accent-dark: #425eae;
+  --accent-light: #c5d1f4;
+  --accent-soft: #eef2fd;
+}
+
+[data-theme="odontologia"] {
+  --accent: #1a9cc4;
+  --accent-dark: #14789a;
+  --accent-light: #a9e0ee;
+  --accent-soft: #e7f6fa;
+}
+
+[data-theme="estetica"] {
+  --accent: #b96a8f;
+  --accent-dark: #97506f;
+  --accent-light: #ecc7d9;
+  --accent-soft: #fbeef4;
+}
+
+[data-theme="fisioterapia"] {
+  --accent: #e08a3c;
+  --accent-dark: #bd6e26;
+  --accent-light: #f6d5b1;
+  --accent-soft: #fdf3e8;
+}
+
+[data-theme="nutricao"] {
+  --accent: #6aa832;
+  --accent-dark: #538425;
+  --accent-light: #d1e8b5;
+  --accent-soft: #f1f8e8;
+}

@@ -1,0 +1,43 @@
+# Environment and credentials
+.env
+.env.*
+!.env.example
+!.env.test.example
+**/secrets/
+**/credenciais*
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Clinical and local data
+**/arquivos/
+**/uploads/
+**/backups/
+**/dumps/
+*.sql
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Python
+**/.venv/
+**/venv/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# JavaScript tooling
+**/node_modules/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

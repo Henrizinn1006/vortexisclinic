@@ -1,0 +1,88 @@
+/* =============================================================
+   Pagina de vertical (/psicologia, /odontologia, ...)
+   O acento vem do tema do produto (data-theme no <body>).
+   ============================================================= */
+
+.product-hero {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(2.5rem, 1.5rem + 5vw, 5rem);
+  background:
+    radial-gradient(800px 380px at 85% -10%, var(--accent-soft) 0%, transparent 65%),
+    var(--vc-bg);
+}
+.product-hero__inner { position: relative; z-index: 1; max-width: 760px; }
+.product-hero__title { margin-bottom: var(--sp-4); }
+.product-hero__text { font-size: var(--fs-md); }
+.product-hero__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-5); }
+
+.breadcrumb { display: flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-xs); color: var(--vc-text-soft); margin-bottom: var(--sp-4); }
+.breadcrumb a:hover { color: var(--vc-blue); }
+.breadcrumb span { opacity: 0.6; }
+
+.soon-panel {
+  display: grid;
+  gap: var(--sp-4);
+  background: var(--vc-surface);
+  border: 1px solid var(--vc-border);
+  border-radius: var(--r-lg);
+  padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  box-shadow: var(--sh-sm);
+  max-width: 720px;
+}
+
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--sp-4); }
+.feature-item {
+  position: relative;
+  background: var(--vc-surface);
+  border: 1px solid var(--vc-border);
+  border-radius: var(--r-md);
+  padding: var(--sp-5) var(--sp-4) var(--sp-4);
+  overflow: hidden;
+  transition: transform 420ms var(--ease-out), border-color 420ms var(--ease-out), box-shadow 420ms var(--ease-out);
+}
+.feature-item::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  height: 2px; width: 32px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  transition: width 520ms var(--ease-out);
+}
+.feature-item:hover { transform: translateY(-4px); border-color: var(--vc-border-strong); box-shadow: var(--sh-md); }
+.feature-item:hover::before { width: 100%; }
+.feature-item b { display: block; font-size: var(--fs-md); color: var(--vc-blue-dark); margin-bottom: var(--sp-2); }
+.feature-item p { font-size: var(--fs-sm); margin: 0; }
+
+.other-products { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--sp-3); }
+.other-product {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
+  background: var(--vc-surface);
+  border: 1px solid var(--vc-border);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-4);
+  font-size: var(--fs-sm);
+  color: var(--vc-blue-dark);
+  font-weight: 600;
+  transition: border-color var(--t-fast), transform var(--t-fast);
+}
+.other-product:hover { border-color: var(--accent); transform: translateY(-3px); box-shadow: var(--sh-sm); }
+.other-product::after { content: "→"; color: var(--accent); transition: transform 320ms var(--ease-out); }
+.other-product:hover::after { transform: translateX(4px); }
+
+/* ---- Paginas de texto legal ---- */
+.legal { padding-block: var(--section-y); }
+.legal__content { max-width: 760px; }
+.legal__content h2 { font-size: var(--fs-lg); margin-top: var(--sp-6); }
+.legal__content p, .legal__content li { font-size: var(--fs-sm); color: var(--vc-text-muted); }
+.legal__content ul { list-style: disc; padding-left: 1.2rem; display: grid; gap: var(--sp-2); margin-bottom: var(--sp-4); }
+.legal__updated { font-size: var(--fs-xs); color: var(--vc-text-soft); }
+.legal__notice {
+  background: var(--vc-blue-soft);
+  border: 1px solid color-mix(in srgb, var(--vc-blue) 18%, white);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+  font-size: var(--fs-sm);
+  color: var(--vc-blue-dark);
+  margin-bottom: var(--sp-5);
+}

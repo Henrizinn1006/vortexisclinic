@@ -1,0 +1,110 @@
+/* =============================================================
+   Estilos específicos de telas (agenda semanal e mensal)
+   ============================================================= */
+
+/* ---------------- Agenda: semana ---------------- */
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+.week__col {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.week__col.is-today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-light); }
+.week__head {
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  display: grid;
+}
+.week__head b { font-size: var(--fs-xs); }
+.week__head span { font-size: var(--fs-2xs); color: var(--text-soft); font-variant-numeric: tabular-nums; }
+.week__col.is-today .week__head { background: var(--accent-soft); }
+.week__body { padding: var(--sp-2); display: grid; gap: 6px; align-content: start; }
+.week__item {
+  display: grid;
+  gap: 1px;
+  padding: 6px 8px;
+  border-radius: var(--r-xs);
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  font-size: var(--fs-2xs);
+  line-height: 1.35;
+}
+.week__item b { font-size: var(--fs-2xs); color: var(--accent-dark); }
+.week__item span { color: var(--text); font-weight: 600; }
+.week__item--realizado { background: var(--ok-bg); border-left-color: var(--ok); }
+.week__item--realizado b { color: var(--ok); }
+.week__item--falta { background: var(--danger-bg); border-left-color: var(--danger); }
+.week__item--falta b { color: var(--danger); }
+.week__item--cancelado { background: var(--neutral-bg); border-left-color: var(--border-strong); opacity: 0.75; }
+.week__item--cancelado b { color: var(--text-muted); }
+.week__item--cancelado span { text-decoration: line-through; color: var(--text-muted); }
+.week__vazio { font-size: var(--fs-2xs); color: var(--text-soft); text-align: center; padding: var(--sp-3) 0; }
+
+@media (max-width: 900px) {
+  .week { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .week { grid-template-columns: minmax(0, 1fr); }
+  .week__col { min-height: 0; }
+}
+
+/* ---------------- Agenda: mês ---------------- */
+.month {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.month__dow {
+  font-size: var(--fs-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-soft);
+  font-weight: 700;
+  text-align: center;
+  padding-bottom: 2px;
+}
+.month__cell {
+  position: relative;
+  min-height: 74px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 6px;
+  padding: 8px;
+  text-align: left;
+  transition: border-color var(--t-fast), background var(--t-fast);
+}
+.month__cell:hover { border-color: var(--accent); background: var(--accent-soft); }
+.month__cell.is-out { opacity: 0.42; }
+.month__cell.is-today { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-light); }
+.month__num { font-size: var(--fs-xs); font-weight: 700; font-variant-numeric: tabular-nums; }
+.month__count {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+.month__cell.is-today .month__count { background: var(--accent); color: #fff; }
+
+@media (max-width: 720px) {
+  .month { gap: 4px; }
+  .month__cell { min-height: 56px; padding: 6px; }
+}
+
+/* ---------------- Ajuste fino de campos em modais ---------------- */
+input.field, .field input[disabled] { color: var(--text); }
+input.field:disabled { background: var(--surface-2); color: var(--text-soft); }

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /politica-de-privacidade/
+Disallow: /termos-de-uso/
+
+Sitemap: https://vortexisclinic.com.br/sitemap.xml

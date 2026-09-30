@@ -1,0 +1,181 @@
+/* =============================================================
+   ENTRADA — login, cadastro e escolha de workspace
+   Tela cheia, fora do painel. Enquanto ela está no ar, o app
+   fica escondido (body[data-auth]) — nada de dados é montado.
+   ============================================================= */
+
+body[data-auth] .app,
+body[data-auth] .bottomnav { display: none !important; }
+
+[data-auth-outlet] { display: none; }
+body[data-auth] [data-auth-outlet] { display: block; }
+
+.auth {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-4);
+  padding: var(--sp-5) var(--sp-4);
+  background:
+    radial-gradient(1200px 500px at 50% -10%, rgba(36, 99, 168, .10), transparent 60%),
+    var(--bg);
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 430px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--sp-6) var(--sp-5);
+}
+
+.auth__marca { margin-bottom: var(--sp-4); }
+.auth__marca img { display: block; }
+
+.auth__card h1 {
+  font-size: var(--fs-xl);
+  margin-bottom: 4px;
+}
+
+.auth__sub {
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+  margin-bottom: var(--sp-5);
+}
+
+.auth__campo { display: block; margin-bottom: var(--sp-4); }
+
+.auth__campo > span {
+  display: block;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 6px;
+}
+
+.auth__campo input,
+.auth__campo select {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--fs-base);
+}
+
+.auth__campo input:focus-visible,
+.auth__campo select:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+  border-color: var(--brand);
+}
+
+.auth__campo small {
+  display: block;
+  margin-top: 5px;
+  font-size: var(--fs-xs);
+  color: var(--text-soft);
+}
+
+.auth__erro,
+.auth__ok {
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  font-size: var(--fs-sm);
+  margin-bottom: var(--sp-4);
+}
+
+.auth__erro {
+  background: rgba(200, 60, 60, .08);
+  border: 1px solid rgba(200, 60, 60, .30);
+  color: #8d2020;
+}
+
+.auth__ok {
+  background: rgba(40, 166, 122, .10);
+  border: 1px solid rgba(40, 166, 122, .32);
+  color: #155e44;
+}
+
+.auth__rodape {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  justify-content: space-between;
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--border);
+}
+
+.auth__nota {
+  max-width: 430px;
+  text-align: center;
+  font-size: var(--fs-xs);
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+
+/* ---------- escolha de workspace ---------- */
+.auth__workspaces { display: grid; gap: var(--sp-2); }
+
+.auth__workspace {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+
+.auth__workspace:hover {
+  border-color: var(--brand);
+  background: var(--surface-soft, rgba(36, 99, 168, .04));
+}
+
+.auth__workspace:active { transform: translateY(1px); }
+
+.auth__workspace-nome { font-weight: 600; font-size: var(--fs-base); }
+.auth__workspace-papel { font-size: var(--fs-xs); color: var(--text-soft); }
+
+@media (max-width: 480px) {
+  .auth { padding: var(--sp-4) var(--sp-3); justify-content: flex-start; padding-top: var(--sp-6); }
+  .auth__card { padding: var(--sp-5) var(--sp-4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth__workspace { transition: none; }
+}
+
+/* ---------- Convite ----------
+   O que a pessoa precisa ver antes de aceitar: para qual conta,
+   com qual e-mail e em que papel. Nada além disso. */
+.auth__convite {
+  background: var(--surface-2, rgba(0,0,0,.04));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm, 8px);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-4);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}
+.auth__convite-msg {
+  margin-top: var(--sp-2);
+  font-style: italic;
+  opacity: .85;
+  overflow-wrap: anywhere;
+}

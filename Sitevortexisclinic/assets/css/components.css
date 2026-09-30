@@ -1,0 +1,199 @@
+/* =============================================================
+   Componentes reutilizaveis: botoes, badges, cards, logo, icones
+   ============================================================= */
+
+/* ---------- Botoes ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: 0.85rem 1.5rem;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: transform var(--t-fast), box-shadow var(--t-base), background var(--t-base), color var(--t-base);
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+
+.btn--primary {
+  background: linear-gradient(120deg, var(--vc-blue) 0%, var(--vc-blue-dark) 100%);
+  color: #fff;
+  box-shadow: var(--sh-sm);
+}
+.btn--primary:hover { box-shadow: var(--sh-md); }
+
+.btn--accent {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: var(--sh-sm);
+}
+.btn--accent:hover { background: var(--accent-dark); box-shadow: var(--sh-md); }
+
+.btn--outline {
+  background: var(--vc-surface);
+  color: var(--vc-blue-dark);
+  border-color: var(--vc-border-strong);
+}
+.btn--outline:hover { border-color: var(--vc-blue); color: var(--vc-blue); }
+
+.btn--ghost { background: transparent; color: var(--vc-blue-dark); padding-inline: 0.9rem; }
+.btn--ghost:hover { color: var(--vc-blue); }
+
+.btn--light { background: #fff; color: var(--vc-blue-dark); }
+.btn--on-dark { background: rgba(255, 255, 255, 0.12); color: #fff; border-color: rgba(255, 255, 255, 0.35); }
+.btn--on-dark:hover { background: rgba(255, 255, 255, 0.2); }
+
+.btn--sm { padding: 0.6rem 1.1rem; font-size: var(--fs-xs); }
+.btn--block { width: 100%; }
+.btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+.btn__icon { width: 16px; height: 16px; flex: none; }
+
+/* ---------- Badges / pills ---------- */
+.badge {
+  display: inline-flex;
+  white-space: nowrap;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.badge--available { background: var(--vc-green-soft); color: var(--vc-green-dark); }
+.badge--soon { background: var(--vc-blue-soft); color: var(--vc-blue-dark); }
+.badge--planned { background: #f1f4f6; color: var(--vc-text-muted); }
+.badge__dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--vc-green-dark);
+  margin-bottom: var(--sp-3);
+}
+.eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--vc-surface);
+  border: 1px solid var(--vc-border);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+  box-shadow: var(--sh-xs);
+  transition: transform var(--t-base), box-shadow var(--t-base), border-color var(--t-base);
+}
+.card--hover:hover { transform: translateY(-4px); box-shadow: var(--sh-md); border-color: var(--vc-border-strong); }
+.card__title { margin-bottom: var(--sp-2); }
+.card__text { font-size: var(--fs-sm); margin-bottom: 0; }
+
+/* ---------- Card de produto (vertical) ---------- */
+.product-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  position: relative;
+  overflow: hidden;
+}
+.product-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-light) 100%);
+  opacity: 0.9;
+}
+.product-card__head {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: var(--sp-3);
+}
+.product-card__head > div { min-width: 0; }
+.product-card__head .badge { flex: none; }
+.product-card__name { font-size: var(--fs-lg); margin: 0; }
+.product-card__brand {
+  display: block;
+  white-space: nowrap;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vc-text-soft);
+  margin-bottom: 2px;
+}
+.product-card__text { font-size: var(--fs-sm); color: var(--vc-text-muted); margin: 0; }
+.product-card__features { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: auto; padding-top: var(--sp-2); }
+.feature-pill {
+  font-size: var(--fs-xs);
+  padding: 0.28rem 0.65rem;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, white);
+}
+.product-card__footer { margin-top: var(--sp-4); }
+.product-card--soon { background: linear-gradient(180deg, #fff 0%, var(--vc-bg) 100%); }
+
+
+
+/* ---------- Passos numerados ---------- */
+.step { position: relative; padding-top: var(--sp-2); }
+.step__num {
+  display: inline-block;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  background: linear-gradient(120deg, var(--vc-blue) 0%, var(--vc-green) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: var(--sp-4);
+  padding-right: var(--sp-3);
+}
+.section--alt .step__num { background-color: var(--vc-surface); }
+.step__title { margin-bottom: var(--sp-2); font-size: var(--fs-md); }
+.step__text { font-size: var(--fs-sm); margin: 0; }
+
+/* ---------- Logo ---------- */
+.logo { display: inline-flex; align-items: center; gap: 0.6rem; line-height: 0; }
+.logo__mark { width: 40px; height: auto; flex: none; }
+.logo__wordmark { height: 28px; width: auto; flex: none; }
+.logo--on-dark .logo__wordmark { opacity: 0.95; }
+
+@media (max-width: 420px) {
+  .logo { gap: 0.45rem; }
+  .logo__mark { width: 34px; }
+  .logo__wordmark { height: 22px; }
+}
+
+.site-footer .logo__mark { width: 46px; }
+.site-footer .logo__wordmark { height: 30px; }
+
+/* ---------- Divisores decorativos ---------- */
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}

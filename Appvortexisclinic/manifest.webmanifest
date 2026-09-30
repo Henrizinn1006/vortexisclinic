@@ -1,0 +1,23 @@
+{
+  "name": "Vortexis Clinic — Painel",
+  "short_name": "Clinic",
+  "description": "Gestão de consultório para psicólogos.",
+  "start_url": "./index.html#/",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f4f7f9",
+  "theme_color": "#12314f",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "categories": ["medical", "productivity", "business"],
+  "icons": [
+    { "src": "assets/images/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/images/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Agenda de hoje", "url": "./index.html#/agenda" },
+    { "name": "Pacientes", "url": "./index.html#/pacientes" },
+    { "name": "Pendências", "url": "./index.html#/pendencias" }
+  ]
+}
