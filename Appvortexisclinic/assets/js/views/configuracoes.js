@@ -153,6 +153,58 @@
       </div>`;
   }
 
+  /* ---------------- plano, limites e uso ----------------
+     O uso aparece AO LADO do limite: "5 de 15" é o que ajuda a decidir;
+     "limite: 15" sozinho não diz nada. Limite nulo é "sem limite" — e a
+     tela diz isso em vez de mostrar barra vazia. Não há botão de trocar
+     de plano: sem cobrança atrás, seria um "vire Pro de graça". */
+  function linhaDeLimite(rotulo, usado, limite, unidade) {
+    var texto = limite === null
+      ? fmt.numero(usado) + (unidade || "") + " · sem limite"
+      : fmt.numero(usado) + " de " + fmt.numero(limite) + (unidade || "");
+    var pct = limite ? Math.min(100, Math.round((usado / limite) * 100)) : 0;
+    var tom = pct >= 80 ? "meter--warn" : "meter--ok";
+    return html`
+      <div style="display:grid;gap:var(--sp-2)">
+        <div class="row" style="justify-content:space-between;gap:var(--sp-3)">
+          <span class="stat__label">${rotulo}</span>
+          <b>${texto}</b>
+        </div>
+        ${limite === null ? html.vazio
+          : html`<div class="meter ${tom}" role="img"
+                   aria-label="${rotulo}: ${pct}% do limite"><i style="width:${pct}%"></i></div>`}
+        ${limite !== null && usado >= limite
+          ? html`<span class="stat__hint">Limite atingido: o que já existe continua
+              disponível, só não dá para incluir mais.</span>`
+          : html.vazio}
+      </div>`;
+  }
+
+  function cartaoPlano(p) {
+    var termos = VC.terms.atual();
+    var situacao = p.status + (p.testeAte && p.status === "em teste"
+      ? " até " + fmt.dataLonga(p.testeAte) : "");
+    return html`
+      <div class="grid grid--3">
+        ${ui.stat({ rotulo: "Plano", valor: p.nome, dica: situacao })}
+        ${ui.stat({ rotulo: "Mensalidade",
+                    valor: p.precoMensal === null ? "—" : fmt.moeda(p.precoMensal),
+                    dica: p.precoMensal === null ? "ainda não definida" : "por mês" })}
+        ${ui.stat({ rotulo: "Situação", valor: p.vigente ? "Em dia" : "Suspensa",
+                    tom: p.vigente ? "" : "warn" })}
+      </div>
+      <div style="display:grid;gap:var(--sp-4);margin-top:var(--sp-5)">
+        ${linhaDeLimite("Profissionais", p.uso.profissionais, p.limites.profissionais)}
+        ${linhaDeLimite("Pessoas da equipe", p.uso.membros, p.limites.membros)}
+        ${linhaDeLimite(termos["client.many"] + " ativos", p.uso.pessoas, p.limites.pessoas)}
+        ${linhaDeLimite("Arquivos", p.uso.armazenamentoMb, p.limites.armazenamentoMb, " MB")}
+      </div>
+      <div class="notice" style="margin-top:var(--sp-5)">
+        <div>Para mudar de plano, fale com a Vortexis. Mudar para um plano menor
+        <b>nunca apaga</b> nada: tudo o que já foi cadastrado continua visível.</div>
+      </div>`;
+  }
+
   function render() {
     return html`
       <div class="page-head">
@@ -161,7 +213,11 @@
           <p>Preferências desta conta</p>
         </div>
       </div>
-      <div class="card"><div class="card__body" data-config>${ui.skeletonLinhas(5)}</div></div>`;
+      <div class="card"><div class="card__body" data-config>${ui.skeletonLinhas(5)}</div></div>
+      ${podeGravar() ? html`
+        <h2 style="font-size:var(--fs-base);margin:var(--sp-6) 0 var(--sp-3)">Plano e uso</h2>
+        <div class="card"><div class="card__body" data-plano>${ui.skeletonLinhas(3)}</div></div>`
+        : html.vazio}`;
   }
 
   function pintar(c) {
@@ -188,6 +244,16 @@
         titulo: "Não foi possível carregar", texto: "Tente novamente em instantes."
       }));
     });
+
+    if (podeGravar()) {
+      VC.services.configuracoes.plano().then(function (p) {
+        VC.safe.render(VC.dom.el("[data-plano]"), cartaoPlano(p));
+      }, function () {
+        VC.safe.render(VC.dom.el("[data-plano]"), ui.vazio({
+          titulo: "Não foi possível carregar o plano", texto: "Tente novamente em instantes."
+        }));
+      });
+    }
 
     VC.dom.on(alvo, "click", "[data-dia]", function (e, botao) {
       botao.setAttribute("aria-pressed",
@@ -241,5 +307,6 @@
   }
 
   VC.views = VC.views || {};
-  VC.views.configuracoes = { render: render, mount: mount };
+  /* `_cartaoPlano` exposto só para a suíte conferir o que a tela escreve. */
+  VC.views.configuracoes = { render: render, mount: mount, _cartaoPlano: cartaoPlano };
 })(window);

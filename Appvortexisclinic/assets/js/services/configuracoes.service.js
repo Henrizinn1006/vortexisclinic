@@ -28,6 +28,13 @@
       return base.buscar("/workspace/settings").then(mapa.configuracao);
     },
 
+    /* Plano, limites e uso (GET /workspace/plan). Só leitura: trocar de
+       plano não tem rota — sem cobrança atrás, seria "vire Pro de graça".
+       Exige `settings.manage`; a tela só chama para quem tem. */
+    plano: function () {
+      return base.buscar("/workspace/plan").then(mapa.plano);
+    },
+
     salvar: function (dados) {
       dados = dados || {};
       var corpo = {};

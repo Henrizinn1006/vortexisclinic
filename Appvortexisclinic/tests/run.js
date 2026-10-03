@@ -83,7 +83,11 @@ function carregar(rel) {
   "assets/js/services/documentos.service.js",
   "assets/js/services/privacidade.service.js",
   "assets/js/services/configuracoes.service.js",
-  "assets/js/services/dashboard.service.js"
+  "assets/js/services/dashboard.service.js",
+  /* Só o que a suíte confere de tela: o cartão do plano. */
+  "assets/js/components/ui.js",
+  "assets/js/components/form.js",
+  "assets/js/views/configuracoes.js"
 ].forEach(carregar);
 
 var VC = contexto.VC;
@@ -238,6 +242,15 @@ var EQUIPE = {
     convites: []
   },
   tnt_002: { membros: [], convites: [] }
+};
+
+/* Plano: limite null é "sem limite"; preço null é "ainda não definido". */
+var PLANO = {
+  plano: "essencial", plano_nome: "Essencial", status: "trialing", vigente: true,
+  trial_ate: "2026-10-17T12:00:00", preco_mensal: null,
+  limites: { profissionais: 5, membros: 10, clientes: 500, armazenamento_mb: null },
+  recursos: { clinico: true, documentos: true, exportacao: true, lembretes: true },
+  uso: { profissionais: 1, membros: 1, clientes: 498, armazenamento_mb: 12.5 }
 };
 
 var CONFIG = {
@@ -538,6 +551,13 @@ VC.api = {
     }
     if (rota === "/workspace/settings") {
       return Promise.resolve(CONFIG[SERVIDOR.ativo]);
+    }
+    if (rota === "/workspace/plan") {
+      /* Como no servidor real: plano é informação de conta (settings.manage). */
+      if (corpoDoMe().permissoes.indexOf("settings.manage") === -1) {
+        return Promise.reject({ status: 403, code: "sem_permissao" });
+      }
+      return Promise.resolve(PLANO);
     }
 
     var fichaNota = rota.match(/^\/workspace\/notes\/([^/]+)$/);
@@ -1274,6 +1294,38 @@ grupo("Equipe", function () {
 /* =============================================================
    CONFIGURAÇÕES DA CONTA
    ============================================================= */
+/* =============================================================
+   PLANO E USO
+   ============================================================= */
+grupo("Plano e uso", function () {
+  return VC.services.configuracoes.plano().then(function (p) {
+    igual(p.nome, "Essencial", "lê o plano da conta");
+    igual(p.status, "em teste", "status traduzido na fronteira (trialing → em teste)");
+    ok(p.precoMensal === null, "preço nulo continua nulo (a tela não inventa valor)");
+    igual(p.limites.pessoas, 500, "limite vem do servidor, como número");
+    igual(p.uso.pessoas, 498, "uso vem ao lado do limite");
+    ok(p.limites.armazenamentoMb === null, "limite nulo é sem limite, não zero");
+
+    var pagina = VC.safe.html`${VC.views.configuracoes._cartaoPlano(p)}`.toString();
+    ok(pagina.indexOf("498 de 500") > -1, "a tela mostra \"498 de 500\"");
+    ok(pagina.indexOf("sem limite") > -1, "e diz \"sem limite\" quando não há teto");
+    ok(pagina.indexOf("meter--warn") > -1, "perto do limite a barra muda de tom");
+    ok(!/data-acao="(trocar|mudar)-plano"/.test(pagina), "não há botão de trocar de plano");
+
+  }).then(function () {
+    SERVIDOR.ativo = "tnt_002";       // profissional: sem settings.manage
+    return VC.services.configuracoes.plano().then(function () {
+      ok(false, "profissional não deveria ler o plano");
+    }, function (erro) {
+      igual(erro.status, 403, "quem não administra a conta não lê o plano");
+    });
+  }).then(function () {
+    SERVIDOR.ativo = "tnt_001";
+    var vazou = ROTAS_PEDIDAS.filter(function (r) { return /\/workspace\/plan.*(tenant|workspace_id)/.test(r); });
+    igual(vazou.length, 0, "a rota do plano não carrega tenant_id");
+  });
+});
+
 grupo("Configurações da conta", function () {
   return VC.services.configuracoes.obter().then(function (c) {
     igual(c.jornadaInicio, "08:00", "lê a jornada da conta");

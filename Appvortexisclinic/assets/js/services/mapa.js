@@ -500,7 +500,48 @@
     };
   }
 
+  /* ---------------- plano da conta ----------------
+     Limite `null` é SEM LIMITE, não zero — e a tela precisa dizer isso.
+     Preço `null` é "ainda não definido": a tela não inventa valor. */
+  var STATUS_ASSINATURA = {
+    trialing: "em teste", active: "ativa", past_due: "pagamento em atraso", canceled: "cancelada"
+  };
+
+  function limiteOuNulo(v) { return v === null || v === undefined ? null : Number(v); }
+
+  function plano(p) {
+    if (!p) return null;
+    var l = p.limites || {}, u = p.uso || {}, r = p.recursos || {};
+    return {
+      chave: p.plano,
+      nome: p.plano_nome,
+      status: traduzir(STATUS_ASSINATURA, p.status),
+      vigente: !!p.vigente,
+      testeAte: p.trial_ate || null,
+      precoMensal: p.preco_mensal === null || p.preco_mensal === undefined
+        ? null : Number(p.preco_mensal),
+      limites: {
+        profissionais: limiteOuNulo(l.profissionais),
+        membros: limiteOuNulo(l.membros),
+        pessoas: limiteOuNulo(l.clientes),
+        armazenamentoMb: limiteOuNulo(l.armazenamento_mb)
+      },
+      uso: {
+        profissionais: Number(u.profissionais || 0),
+        membros: Number(u.membros || 0),
+        pessoas: Number(u.clientes || 0),
+        armazenamentoMb: Number(u.armazenamento_mb || 0)
+      },
+      recursos: {
+        clinico: !!r.clinico, documentos: !!r.documentos,
+        exportacao: !!r.exportacao, lembretes: !!r.lembretes
+      }
+    };
+  }
+
   VC.mapa = {
+    plano: plano,
+    STATUS_ASSINATURA: STATUS_ASSINATURA,
     consentimento: consentimento,
     pedido: pedido,
     decisao: decisao,
