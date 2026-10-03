@@ -18,7 +18,7 @@ from app.models.professional import Professional
 from app.models.tenant import Tenant
 from app.models.user import User
 from app.services.sessions import agora
-from tests.conftest import SENHA_PADRAO, cadastrar, csrf, entrar
+from tests.conftest import SENHA_PADRAO, cadastrar, csrf, entrar, hoje_na_conta
 
 AMANHA = (agora() + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0)
 
@@ -159,7 +159,7 @@ def test_conflito_de_horario_nao_vaza_agenda_alheia(cliente, clinica):
 
 
 def test_dashboard_do_profissional_conta_so_o_dele(cliente, clinica):
-    hoje = agora().replace(hour=21, minute=0, second=0, microsecond=0)
+    hoje = hoje_na_conta(14)
     pessoa_dona = novo_cliente(cliente, "Pessoa da Dona")
     cliente.post("/workspace/appointments",
                  json={"cliente_id": pessoa_dona["id"], "inicio": hoje.isoformat()},

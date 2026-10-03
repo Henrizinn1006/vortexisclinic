@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from app.services.sessions import agora
-from tests.conftest import cadastrar, csrf
+from tests.conftest import cadastrar, csrf, hoje_na_conta
 
 AMANHA = (agora() + timedelta(days=1)).replace(hour=14, minute=0, second=0, microsecond=0)
 
@@ -174,7 +174,7 @@ def test_atendimento_de_outra_conta_nao_existe(cliente, pessoa):
 
 # ---------------- números ----------------
 def test_dashboard_conta_o_dia_e_a_semana(cliente, pessoa):
-    hoje = agora().replace(hour=23, minute=0, second=0, microsecond=0)
+    hoje = hoje_na_conta(14)
     a = agendar(cliente, pessoa, inicio=hoje).json()
     cliente.post(f"/workspace/appointments/{a['id']}/status",
                  json={"status": "done"}, headers=csrf(cliente))
@@ -188,7 +188,7 @@ def test_dashboard_conta_o_dia_e_a_semana(cliente, pessoa):
 
 
 def test_cancelado_sai_do_volume_e_da_receita(cliente, pessoa):
-    hoje = agora().replace(hour=22, minute=0, second=0, microsecond=0)
+    hoje = hoje_na_conta(15)
     a = agendar(cliente, pessoa, inicio=hoje).json()
     cliente.post(f"/workspace/appointments/{a['id']}/status",
                  json={"status": "cancelled"}, headers=csrf(cliente))

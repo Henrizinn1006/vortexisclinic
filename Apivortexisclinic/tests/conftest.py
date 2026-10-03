@@ -1,7 +1,7 @@
 """
 Ambiente dos testes.
 
-Três cuidados que valem a leitura:
+Quatro cuidados que valem a leitura:
 
 1. **O banco de teste é obrigatoriamente um banco `_test`.** Se a variável
    apontar para outro nome, a suíte se recusa a rodar. É a trava que
@@ -10,9 +10,13 @@ Três cuidados que valem a leitura:
    schema diferente do que vai para produção não prova nada.
 3. **Entre testes, só as tabelas de dados são limpas.** Papéis, permissões
    e profissões vêm do seed da migration e continuam lá.
+4. **A pasta de documentos também é de teste, e também é esvaziada.** Pelo
+   mesmo motivo do item 1, a suíte recusa rodar se o nome da pasta não
+   contiver `test`: o padrão (`arquivos`) é onde ficam os documentos reais.
 """
 import os
 import pathlib
+import shutil
 import subprocess
 import sys
 
@@ -33,6 +37,17 @@ if not settings.VC_DB_NAME.endswith("_test"):
     raise SystemExit(
         f"Recusando rodar: VC_DB_NAME='{settings.VC_DB_NAME}' não termina em '_test'. "
         "A suíte limpa tabelas — aponte para um banco de teste."
+    )
+
+# A mesma trava para a pasta de documentos: a suíte também a esvazia, e o
+# padrão (`arquivos`) é onde ficam os recibos e anexos de verdade.
+PASTA_ARQUIVOS = pathlib.Path(settings.VC_FILES_DIR)
+if not PASTA_ARQUIVOS.is_absolute():
+    PASTA_ARQUIVOS = RAIZ / PASTA_ARQUIVOS
+if "test" not in PASTA_ARQUIVOS.name.lower():
+    raise SystemExit(
+        f"Recusando rodar: VC_FILES_DIR='{settings.VC_FILES_DIR}' não é uma pasta de teste "
+        "(o nome precisa conter 'test'). A suíte esvazia essa pasta."
     )
 
 from sqlalchemy import text  # noqa: E402
@@ -73,6 +88,8 @@ def banco_limpo(migrar):
         for nome in nomes:
             conn.execute(text(f"DELETE FROM `{nome}`"))
         conn.execute(text("SET FOREIGN_KEY_CHECKS = 1"))
+    # Documento em disco sem linha no banco é lixo de teste anterior.
+    shutil.rmtree(PASTA_ARQUIVOS, ignore_errors=True)
     limitador.zerar_tudo()
     yield
 
@@ -119,6 +136,21 @@ def cadastrar(cliente, *, nome, email, workspace, profissao=None, registro=None,
     if registro:
         corpo["registro"] = registro
     return cliente.post("/auth/register", json=corpo)
+
+
+def hoje_na_conta(hora: int):
+    """Hoje, à `hora` dada, no fuso da conta (America/Sao_Paulo) — em UTC.
+
+    Não use `agora().replace(hour=23)` para "hoje": isso é hoje em UTC, e o
+    painel conta o dia no fuso da conta. Entre 21h e meia-noite de Brasília
+    as duas datas divergem, e o teste falhava sozinho — ou, pior, passava
+    sem testar nada, quando esperava zero.
+    """
+    from datetime import datetime, time
+
+    from app.domain.calendario import PADRAO, hoje_local, para_utc
+
+    return para_utc(datetime.combine(hoje_local(PADRAO), time(hora)), PADRAO)
 
 
 def entrar(cliente, email, senha=SENHA_PADRAO):
