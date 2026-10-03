@@ -181,7 +181,7 @@ def financeiro_serie(meses: int = Query(6, ge=1, le=24),
 
 
 @router.get("/agenda", response_model=List[sn.AtendimentoOut])
-def agenda(de: datetime = Query(...), ate: datetime = Query(...),
+def agenda(de: sn.Instante = Query(...), ate: sn.Instante = Query(...),
            ctx: Contexto = Depends(exigir("agenda.read"))):
     linhas = servico_atendimentos.listar(ctx.db, ctx, de=de, ate=ate, limite=1000)
     mapa = apresentacao.MapaDeProfissionais(ctx.db, [a.professional_id for a in linhas])

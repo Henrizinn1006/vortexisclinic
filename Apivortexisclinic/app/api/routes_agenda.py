@@ -13,7 +13,6 @@ contagem do que está lá dentro. Quem confirma (`forcar`) bloqueia mesmo
 assim — e os atendimentos **continuam de pé**. Cancelar sessão de alguém é
 decisão de gente, não efeito colateral de um bloqueio de férias.
 """
-from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -121,7 +120,7 @@ def encerrar_serie(public_id: str, dados: sn.EncerrarSerieIn, request: Request,
 
 # ---------------- bloqueios ----------------
 @router.get("/blocks", response_model=List[sn.BloqueioOut])
-def listar_bloqueios(de: Optional[datetime] = Query(None), ate: Optional[datetime] = Query(None),
+def listar_bloqueios(de: Optional[sn.Instante] = Query(None), ate: Optional[sn.Instante] = Query(None),
                      ctx: Contexto = Depends(exigir("agenda.read"))):
     linhas = servico.listar_bloqueios(ctx.db, ctx, de=de, ate=ate)
     mapa = apresentacao.MapaDeProfissionais(ctx.db, [b.professional_id for b in linhas])

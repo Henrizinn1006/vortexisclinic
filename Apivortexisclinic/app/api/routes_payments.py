@@ -6,7 +6,6 @@ Permissão: **ler** o financeiro é `finance.read`; **mexer** no dinheiro é
 próprio financeiro mas não dá baixa; quem opera o caixa é o dono da conta
 ou a recepção.
 """
-from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -39,8 +38,8 @@ def saida(p) -> sn.PagamentoOut:
 # ---------------- livro-caixa ----------------
 @router.get("/payments", response_model=List[sn.PagamentoOut])
 def listar(
-    de: Optional[datetime] = Query(None),
-    ate: Optional[datetime] = Query(None),
+    de: Optional[sn.Instante] = Query(None),
+    ate: Optional[sn.Instante] = Query(None),
     metodo: Optional[str] = Query(None, max_length=20),
     incluir_estornados: bool = Query(True),
     limite: int = Query(200, ge=1, le=500),

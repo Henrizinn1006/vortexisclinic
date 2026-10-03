@@ -5,7 +5,6 @@ Cancelar tem permissão própria (`appointments.cancel`): desmarcar afeta a
 agenda de outra pessoa e o faturamento, então não vem de brinde com
 "editar".
 """
-from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query, Request, Response
@@ -27,8 +26,8 @@ def _saida(ctx: Contexto, linhas):
 @router.get("", response_model=List[sn.AtendimentoOut])
 def listar(
     resposta: Response,
-    de: Optional[datetime] = Query(None),
-    ate: Optional[datetime] = Query(None),
+    de: Optional[sn.Instante] = Query(None),
+    ate: Optional[sn.Instante] = Query(None),
     status: Optional[str] = Query(None, max_length=20),
     modalidade: Optional[str] = Query(None, max_length=20),
     pagamento: Optional[str] = Query(None, max_length=20),

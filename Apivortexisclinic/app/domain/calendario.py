@@ -34,6 +34,21 @@ def agora_utc() -> datetime:
     return datetime.now(UTC).replace(tzinfo=None)
 
 
+def normalizar_utc(quando: datetime) -> datetime:
+    """Data-hora que chega pela API → UTC ingênuo, como o banco guarda.
+
+    Com fuso (`2026-11-12T14:00:00-03:00`, `...Z`): converte para UTC e tira
+    o tzinfo. Sem fuso: já é UTC por contrato — é o que o painel manda.
+
+    Sem isto, `14:00-03:00` era gravado como 14h UTC (três horas fora, em
+    silêncio) e o prontuário quebrava com 500 ao comparar data com fuso
+    contra data sem fuso.
+    """
+    if quando.tzinfo is None or quando.utcoffset() is None:
+        return quando.replace(tzinfo=None)
+    return quando.astimezone(UTC).replace(tzinfo=None)
+
+
 def para_local(quando: datetime, fuso: ZoneInfo) -> datetime:
     """UTC ingênuo → local ingênuo."""
     return quando.replace(tzinfo=UTC).astimezone(fuso).replace(tzinfo=None)

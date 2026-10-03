@@ -9,9 +9,16 @@ duas casas); datas saem em ISO 8601, sempre UTC.
 """
 from datetime import date, datetime
 from decimal import Decimal
-from typing import List, Literal, Optional
+from typing import Annotated, List, Literal, Optional
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import AfterValidator, BaseModel, EmailStr, Field, field_validator
+
+from app.domain.calendario import normalizar_utc
+
+# Toda data-hora de ENTRADA usa Instante, nunca `datetime` puro: o banco guarda
+# DATETIME sem fuso, sempre UTC, e quem chama a API de fora do painel pode
+# mandar `-03:00` ou `Z`. Campo novo de data-hora num modelo *In → Instante.
+Instante = Annotated[datetime, AfterValidator(normalizar_utc)]
 
 FREQUENCIAS = Literal["weekly", "biweekly", "monthly", "irregular"]
 MODALIDADES = Literal["in_person", "online"]
@@ -55,7 +62,7 @@ class ClienteUpdateIn(BaseModel):
 
 class AtendimentoIn(BaseModel):
     cliente_id: str = Field(min_length=26, max_length=26)
-    inicio: datetime
+    inicio: Instante
     duracao_min: Optional[int] = Field(default=50, ge=5, le=480)
     modalidade: Optional[MODALIDADES] = None
     valor: Optional[Decimal] = Field(default=None, ge=0, le=Decimal("99999999.99"))
@@ -79,7 +86,7 @@ class BaixaIn(BaseModel):
 
     metodo: METODOS_PAGAMENTO
     # Vazio = agora. Serve para lançar no dia certo o que foi recebido ontem.
-    pago_em: Optional[datetime] = None
+    pago_em: Optional[Instante] = None
     # Vazio = o valor do atendimento.
     valor: Optional[Decimal] = Field(default=None, gt=0, le=Decimal("99999999.99"))
     observacao: Optional[str] = Field(default=None, max_length=200)
@@ -90,7 +97,7 @@ class MotivoIn(BaseModel):
 
 
 class ReagendarIn(BaseModel):
-    inicio: datetime
+    inicio: Instante
     duracao_min: Optional[int] = Field(default=None, ge=5, le=480)
 
 
@@ -258,7 +265,7 @@ class NotaIn(BaseModel):
 
     conteudo: str = Field(min_length=1, max_length=20000)
     tipo: Optional[TIPOS_NOTA] = "session"
-    ocorrido_em: Optional[datetime] = None
+    ocorrido_em: Optional[Instante] = None
     atendimento_id: Optional[str] = Field(default=None, max_length=26)
 
 
@@ -336,7 +343,7 @@ class SerieIn(BaseModel):
     """
 
     cliente_id: str = Field(min_length=26, max_length=26)
-    inicio: datetime
+    inicio: Instante
     frequencia: FREQUENCIAS_SERIE = "weekly"
     ocorrencias: int = Field(default=8, ge=1, le=52)
     ate: Optional[date] = None
@@ -385,8 +392,8 @@ class SerieCriadaOut(BaseModel):
 
 
 class BloqueioIn(BaseModel):
-    inicio: datetime
-    fim: datetime
+    inicio: Instante
+    fim: Instante
     titulo: str = Field(min_length=1, max_length=120)
     tipo: TIPOS_BLOQUEIO = "other"
     profissional_id: Optional[str] = Field(default=None, max_length=26)
@@ -426,8 +433,8 @@ class ReciboIn(BaseModel):
     aconteceu. Vazio usa os últimos 30 dias.
     """
 
-    de: Optional[datetime] = None
-    ate: Optional[datetime] = None
+    de: Optional[Instante] = None
+    ate: Optional[Instante] = None
 
 
 class DeclaracaoIn(BaseModel):
@@ -469,7 +476,7 @@ class ConsentimentoIn(BaseModel):
     # O texto apresentado. Não é guardado — só o sha256 dele, que é o que
     # prova QUAL texto foi aceito.
     texto: Optional[str] = Field(default=None, max_length=20000)
-    em: Optional[datetime] = None
+    em: Optional[Instante] = None
     origem: Optional[Literal["in_person", "online", "imported"]] = "in_person"
     observacao: Optional[str] = Field(default=None, max_length=300)
 
@@ -488,10 +495,10 @@ class ConsentimentoOut(BaseModel):
 class PedidoIn(BaseModel):
     tipo: TIPOS_PEDIDO
     solicitante: Optional[str] = Field(default="titular", max_length=120)
-    em: Optional[datetime] = None
+    em: Optional[Instante] = None
     # Prazo de resposta: fica vazio quando ninguém definiu. Nenhum número
     # é chutado pelo sistema.
-    prazo: Optional[datetime] = None
+    prazo: Optional[Instante] = None
     observacao: Optional[str] = Field(default=None, max_length=2000)
 
 
@@ -569,5 +576,5 @@ class PagamentoAvulsoIn(BaseModel):
 
     valor: Decimal = Field(gt=0, le=Decimal("99999999.99"))
     metodo: METODOS_PAGAMENTO = "pix"
-    pago_em: Optional[datetime] = None
+    pago_em: Optional[Instante] = None
     observacao: Optional[str] = Field(default=None, max_length=200)

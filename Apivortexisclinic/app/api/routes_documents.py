@@ -159,8 +159,8 @@ def anexar(public_id: str, dados: sn.AnexoIn, request: Request,
 
 # ---------------- exportação do financeiro ----------------
 @router.get("/finance/export")
-def exportar_financeiro(de: Optional[datetime] = Query(None),
-                        ate: Optional[datetime] = Query(None),
+def exportar_financeiro(de: Optional[sn.Instante] = Query(None),
+                        ate: Optional[sn.Instante] = Query(None),
                         ctx: Contexto = Depends(exigir("finance.export"))):
     """Livro-caixa em CSV, para conferir com o extrato ou mandar ao contador.
 
