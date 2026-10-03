@@ -77,6 +77,22 @@
 .legal__content p, .legal__content li { font-size: var(--fs-sm); color: var(--vc-text-muted); }
 .legal__content ul { list-style: disc; padding-left: 1.2rem; display: grid; gap: var(--sp-2); margin-bottom: var(--sp-4); }
 .legal__updated { font-size: var(--fs-xs); color: var(--vc-text-soft); }
+.legal__content h3 { font-size: var(--fs-md); margin-top: var(--sp-5); }
+.legal__content table { width: 100%; border-collapse: collapse; margin-bottom: var(--sp-4); font-size: var(--fs-sm); }
+.legal__content th, .legal__content td { text-align: left; vertical-align: top; padding: var(--sp-2) var(--sp-3); border-bottom: 1px solid var(--vc-border); color: var(--vc-text-muted); }
+.legal__content th { color: var(--vc-blue-dark); font-weight: 600; }
+.legal__table { overflow-x: auto; }
+.legal__toc { display: grid; gap: var(--sp-1); margin-bottom: var(--sp-5); padding-left: 1.2rem; list-style: decimal; }
+.legal__toc a { color: var(--vc-blue); }
+/* Dado que ainda precisa ser preenchido (razão social, CNPJ, foro...).
+   Fica visível de propósito: não dá para publicar sem notar. */
+.legal__todo {
+  background: color-mix(in srgb, var(--vc-warning) 28%, white);
+  color: var(--vc-text);
+  border-radius: 4px;
+  padding: 0 0.3em;
+  font-weight: 600;
+}
 .legal__notice {
   background: var(--vc-blue-soft);
   border: 1px solid color-mix(in srgb, var(--vc-blue) 18%, white);

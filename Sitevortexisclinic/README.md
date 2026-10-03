@@ -1,10 +1,11 @@
-# Vortexis Clinic — Site institucional (Fase 1)
+# Vortexis Clinic — Site institucional
 
 Site institucional da plataforma **Vortexis Clinic** (uma solução VORTEXIS).
 HTML, CSS e JavaScript puros — sem build, sem dependências, sem framework.
 
-> Escopo desta fase: **apenas apresentação**. Nada de login real, pagamentos,
-> assinaturas, banco de dados ou sistemas clínicos.
+> Estado atual: **Psicologia em acesso antecipado.** O site apresenta o que o
+> sistema já faz e leva ao pedido de acesso por e-mail. Login, planos e preços
+> ficam desligados por flag até o painel estar no ar (ver "Para publicar").
 
 ---
 
@@ -32,6 +33,7 @@ Sitevortexisclinic/
 ├── nutricao/index.html
 ├── politica-de-privacidade/index.html
 ├── termos-de-uso/index.html
+├── 404.html  •  .htaccess         # página de erro e config do Apache (Hostinger)
 ├── robots.txt  •  sitemap.xml
 └── assets/
     ├── images/                   # marca (ver abaixo) + os PNGs originais
@@ -126,8 +128,9 @@ sistema automaticamente. **A home não precisa ser mexida.**
 |---|---|
 | `contact.email` / `contact.whatsapp` | Preenchem a seção de contato, o rodapé e os CTAs. WhatsApp só no formato `5511999999999`. |
 | `social` | Lista vazia hoje; ao preencher, os ícones aparecem no rodapé. |
-| `features.auth` | `false` = "Entrar" aparece desativado. Vire `true` na fase do login e informe `links.login` / `links.signup`. |
-| `features.plans` | Reservado para a seção de planos (fase futura). |
+| `features.auth` | `false` = "Entrar" desativado e botão "Quero testar". Vire `true` só quando `app.vortexisclinic.com.br` abrir de verdade (API em VPS). |
+| `features.plans` | Reservado para a seção de planos. Fica `false` enquanto os preços não existirem. |
+| `earlyAccessSubject` | Assunto do e-mail aberto pelos botões "Quero testar". |
 | `features.productPages` | Liga/desliga os links das páginas de vertical. |
 | `prettyUrls` | `false` usa `/psicologia/index.html` (funciona até abrindo o arquivo local). Ao publicar em servidor com URL limpa, vire `true` e os links viram `/psicologia/`. |
 
@@ -138,10 +141,18 @@ sistema automaticamente. **A home não precisa ser mexida.**
 - Conteúdo textual das seções fica **estático no HTML** (melhor para SEO); só o
   catálogo de produtos, header e footer são montados por JS, para não duplicar
   código a cada novo sistema.
-- Psicologia está como `in-development`. Quando o sistema entrar no ar, troque
+- Psicologia está como `early-access`. Quando o acesso abrir para todos, troque
   para `available` — o rótulo e o botão mudam sozinhos.
-- Páginas de privacidade e termos são rascunhos e estão com `noindex`; precisam
-  de revisão antes de publicar.
+- **Só se descreve o que o sistema já faz.** As seções de segurança (home e
+  `security` em `products.js`) e as páginas jurídicas foram escritas a partir do
+  código da API. Não acrescente promessa que o código não cumpre — inclusive
+  prazo de retenção, que é decisão do profissional e não pode ser inventado.
+- Privacidade e Termos têm texto completo, mas continuam com `noindex` e aviso de
+  revisão jurídica. Os dados ainda não definidos (razão social, CNPJ,
+  encarregado, fornecedores, foro) aparecem **destacados em amarelo** de
+  propósito (`.legal__todo`), para não passarem despercebidos.
+- Sem WhatsApp configurado, o cartão de WhatsApp some em vez de mostrar canal
+  morto.
 - **Sem ícones decorativos.** A hierarquia é feita com tipografia, numeração
   (`01`, `02`…) e réguas de acento. Só sobraram ícones funcionais: o "fechar" do
   modal e as marcas de redes sociais no rodapé (`assets/js/components/icons.js`).
@@ -157,8 +168,20 @@ sistema automaticamente. **A home não precisa ser mexida.**
 
 ---
 
-## Próximas fases (não implementadas aqui)
+## Para publicar (Hostinger)
 
-Login e contas • banco de dados multi-tenant • sistema de Psicologia •
-planos e checkout • Asaas e webhooks • painel administrativo •
-`app.vortexisclinic.com.br`.
+1. Envie o conteúdo desta pasta para `public_html/`, **incluindo o `.htaccess`**
+   (arquivo oculto — no gerenciador de arquivos, ative "mostrar ocultos").
+   Ele força HTTPS, tira o `www`, define cabeçalhos de segurança, cache e a
+   página `404.html`.
+2. Ative o SSL do domínio no hPanel antes; sem ele o redirecionamento para
+   HTTPS dá erro.
+3. Antes de indexar Privacidade e Termos: preencha os trechos em amarelo, passe
+   pela revisão jurídica, remova o `<meta name="robots" content="noindex">` das
+   duas páginas e os `Disallow` do `robots.txt`.
+4. Quando o painel estiver no ar: `features.auth: true` em `site.config.js`.
+
+## Ainda não implementado
+
+Seção de planos (depende de preço) • login a partir do site (depende do deploy
+da API) • WhatsApp e redes sociais (dependem dos canais oficiais).

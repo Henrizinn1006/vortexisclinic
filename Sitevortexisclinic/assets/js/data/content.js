@@ -38,7 +38,7 @@
 
     /* Linha do tempo da seção de expansão */
     roadmap: [
-      { title: "Psicologia", note: "Primeira solução" },
+      { title: "Psicologia", note: "Acesso antecipado" },
       { title: "Odontologia", note: "Próxima expansão" },
       { title: "Estética", note: "Expansão posterior" },
       { title: "Fisioterapia e Nutrição", note: "No roadmap" },

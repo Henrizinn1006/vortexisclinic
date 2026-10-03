@@ -11,9 +11,12 @@
 (function (global) {
   "use strict";
 
-  /* Estados possíveis de um produto e como aparecem na interface. */
+  /* Estados possíveis de um produto e como aparecem na interface.
+     live = o sistema já funciona: a página fala no presente ("O que já faz"),
+     não no futuro ("Recursos previstos"). */
   var STATUS = {
-    available: { label: "Disponível", badge: "badge--available", cta: "Conhecer sistema", active: true },
+    available: { label: "Disponível", badge: "badge--available", cta: "Conhecer sistema", active: true, live: true },
+    "early-access": { label: "Acesso antecipado", badge: "badge--available", cta: "Conhecer sistema", active: true, live: true },
     "in-development": { label: "Em desenvolvimento", badge: "badge--available", cta: "Conhecer sistema", active: true },
     "coming-soon": { label: "Em breve", badge: "badge--soon", cta: "Ver detalhes", active: true },
     planned: { label: "No roadmap", badge: "badge--planned", cta: "Ver detalhes", active: true }
@@ -24,30 +27,42 @@
       slug: "psicologia",
       name: "Psicologia",
       fullName: "Vortexis Clinic — Psicologia",
-      status: "in-development",
+      status: "early-access",
       theme: "psicologia",
       icon: "brain",
       order: 1,
       short: "Gestão completa para psicólogos e clínicas de psicologia.",
       description:
-        "Pacientes, agenda, sessões, presenças e financeiro em um único lugar, com o registro clínico organizado do jeito que a rotina do consultório pede.",
+        "Agenda com sessões recorrentes, pessoas atendidas, financeiro, prontuário cifrado e documentos em PDF — num sistema que trata o sigilo clínico como regra, não como opção.",
       features: [
-        "Pacientes",
         "Agenda",
-        "Sessões",
-        "Presença e faltas",
+        "Sessões recorrentes",
+        "Pessoas atendidas",
         "Financeiro",
-        "Prontuários",
-        "Anotações",
-        "Relatórios"
+        "Prontuário cifrado",
+        "Recibos e declarações",
+        "Equipe e permissões",
+        "LGPD"
       ],
       highlights: [
-        { title: "Pacientes e agenda", text: "Cadastro, histórico e agenda com visão de dia, semana e profissional." },
-        { title: "Sessões e frequência", text: "Controle de sessões realizadas, faltas e remarcações sem planilha paralela." },
-        { title: "Prontuário e anotações", text: "Evolução e registros do atendimento organizados por paciente." },
-        { title: "Financeiro do consultório", text: "Recebimentos, pendências e visão simples do mês." },
-        { title: "Relatórios essenciais", text: "Números de atendimentos, faltas e receita para decidir com clareza." },
-        { title: "Acesso de qualquer lugar", text: "Computador, tablet ou celular, com instalação como aplicativo." }
+        { title: "Agenda que entende consultório", text: "Atendimento avulso, série semanal, quinzenal ou mensal e bloqueio de horário. Horário em conflito é recusado; numa série, só a data em conflito fica de fora." },
+        { title: "Pessoas atendidas", text: "Cadastro, vínculo com o profissional, histórico completo, arquivamento e anonimização quando a pessoa pede." },
+        { title: "Financeiro do consultório", text: "Baixa por atendimento, pagamento avulso ou parcial, estorno, pendências, resumo do mês, meta e exportação em CSV." },
+        { title: "Prontuário versionado", text: "Nenhuma nota é sobrescrita: cada edição vira uma versão nova, e a nota assinada só recebe adendo, com motivo." },
+        { title: "Documentos em PDF", text: "Recibo, declaração de comparecimento e cópia de prontuário gerados direto no sistema." },
+        { title: "Equipe com papéis claros", text: "Convite por link e papéis de dono, profissional e recepção. A recepção cuida da agenda e não vê conteúdo clínico." },
+        { title: "Lembretes por e-mail", text: "Lembrete de atendimento, confirmação de endereço e recuperação de senha automáticos." },
+        { title: "Acesso de qualquer lugar", text: "Computador, tablet ou celular, com instalação como aplicativo — sem guardar dado clínico no aparelho." }
+      ],
+      /* Só aparece na página da vertical. Cada item descreve algo que o sistema
+         já faz hoje; não acrescente promessa que o código não cumpre. */
+      security: [
+        { title: "Prontuário cifrado", text: "O texto clínico é cifrado com AES-256 antes de ser gravado. Quem olha o banco de dados direto vê só texto ilegível." },
+        { title: "Trilha de acesso", text: "Cada leitura de prontuário fica registrada: quem abriu, qual nota e quando — inclusive as tentativas negadas." },
+        { title: "Cada clínica isolada", text: "Os dados de uma conta nunca aparecem para outra. O isolamento vale para toda consulta ao banco, não tela a tela." },
+        { title: "Administrar não é ler", text: "Ser dono da conta não dá acesso ao prontuário. Acesso clínico excepcional exige motivo e fica registrado." },
+        { title: "LGPD na prática", text: "Consentimento com versão registrada e pedidos do titular decididos item a item, com motivo e base legal." },
+        { title: "Sessão protegida", text: "Senha guardada com Argon2id e sessão em cookie protegido, com defesa contra requisições forjadas." }
       ],
       audience: "Psicólogos autônomos e clínicas de psicologia com vários profissionais."
     },

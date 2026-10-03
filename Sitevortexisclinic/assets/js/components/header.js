@@ -23,10 +23,13 @@
         '<a class="btn btn--primary' + size + '" href="' + site.links.signup + '">Criar conta</a>'
       );
     }
-    /* Fase 1: presentes visualmente, ativados quando o app existir. */
+    /* Acesso antecipado: o "Entrar" aparece desativado até o painel estar no ar,
+       e o botão principal leva ao pedido de acesso. */
+    var href = global.VC.contactHref(site.earlyAccessSubject);
+    var ext = /^https?:/.test(href) ? ' target="_blank" rel="noopener"' : "";
     return (
-      '<span class="btn btn--ghost' + size + '" aria-disabled="true" title="Disponível em breve">Entrar</span>' +
-      '<a class="btn btn--primary' + size + '" href="' + global.VC.anchor("#solucoes") + '">Conhecer soluções</a>'
+      '<span class="btn btn--ghost' + size + '" aria-disabled="true" title="Disponível no lançamento">Entrar</span>' +
+      '<a class="btn btn--primary' + size + '" href="' + href + '"' + ext + ">Quero testar</a>"
     );
   }
 

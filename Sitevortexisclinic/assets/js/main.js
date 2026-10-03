@@ -32,8 +32,19 @@
           el.rel = "noopener";
         }
       } else {
-        el.textContent = "Canal em configuração";
+        /* Sem número oficial: some o cartão em vez de mostrar canal morto. */
+        var card = el.closest("[data-contact-card]");
+        if (card) card.remove();
+        else el.textContent = "Canal em configuração";
       }
+    });
+
+    /* Botões "Quero testar" fora do header (CTA da home) */
+    var early = document.querySelectorAll("[data-contact='early-access']");
+    [].forEach.call(early, function (el) {
+      var href = global.VC.contactHref(site.earlyAccessSubject);
+      el.href = href;
+      if (/^https?:/.test(href)) { el.target = "_blank"; el.rel = "noopener"; }
     });
 
     var domain = document.querySelectorAll("[data-site='domain']");

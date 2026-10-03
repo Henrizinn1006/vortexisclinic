@@ -39,27 +39,35 @@
     /* Flags das funcionalidades das próximas fases.
        Ligue para true quando a etapa correspondente existir. */
     features: {
-      auth: false,          // botões Entrar / Criar conta ativos
-      plans: false,         // seção de planos e preços
+      // Botões Entrar / Criar conta ativos. Só vire true quando a API estiver
+      // no ar (VPS) e app.vortexisclinic.com.br abrir de verdade — antes
+      // disso o botão leva a uma página quebrada.
+      auth: false,
+      plans: false,         // seção de planos e preços (os preços ainda não existem)
       pwaTutorial: true,    // modal "Como instalar no celular"
       productPages: true    // links das páginas por vertical
     },
 
-    /* URLs de destino das próximas fases (ainda inativas). */
+    /* Destinos do painel. O login e o cadastro moram na mesma tela de entrada. */
     links: {
-      login: "#",
-      signup: "#",
+      login: "https://app.vortexisclinic.com.br/",
+      signup: "https://app.vortexisclinic.com.br/",
       appUrl: "https://app.vortexisclinic.com.br"
     },
+
+    /* Assunto do e-mail do botão "Quero testar" (acesso antecipado). */
+    earlyAccessSubject: "Quero testar a Vortexis Clinic",
 
     /* Se um dia o site rodar com URLs limpas (/psicologia),
        troque para true e os links deixam de usar index.html. */
     prettyUrls: false,
 
+    /* Seis itens no máximo: com mais, o menu aperta no desktop estreito.
+       "Início" fica a cargo do logo. */
     nav: [
-      { label: "Início", href: "#inicio" },
       { label: "Soluções", href: "#solucoes" },
       { label: "Como funciona", href: "#como-funciona" },
+      { label: "Segurança", href: "#seguranca" },
       { label: "Para quem é", href: "#para-quem" },
       { label: "Sobre", href: "#sobre" },
       { label: "Contato", href: "#contato" }
@@ -72,7 +80,9 @@
           links: [
             { label: "Soluções", href: "#solucoes" },
             { label: "Como funciona", href: "#como-funciona" },
+            { label: "Segurança e LGPD", href: "#seguranca" },
             { label: "Aplicativo (PWA)", href: "#aplicativo" },
+            { label: "Perguntas frequentes", href: "#perguntas" },
             { label: "Sobre", href: "#sobre" }
           ]
         },
@@ -87,7 +97,7 @@
       ]
     },
 
-    legal: { updatedAt: "setembro de 2026" }
+    legal: { updatedAt: "outubro de 2026" }
   };
 
   global.VC = global.VC || {};
@@ -112,6 +122,16 @@
       path = base + page + suffix;
     }
     return hash ? path + hash : path;
+  };
+
+  /* Destino do "Quero testar" / "Falar com a Vortexis": WhatsApp se houver,
+     senão e-mail (com assunto, quando informado), senão a seção de contato. */
+  global.VC.contactHref = function (subject) {
+    if (SITE.contact.whatsapp) return "https://wa.me/" + SITE.contact.whatsapp;
+    if (SITE.contact.email) {
+      return "mailto:" + SITE.contact.email + (subject ? "?subject=" + encodeURIComponent(subject) : "");
+    }
+    return global.VC.anchor("#contato");
   };
 
   /* Ancora da home: funciona tanto na home quanto nas internas. */

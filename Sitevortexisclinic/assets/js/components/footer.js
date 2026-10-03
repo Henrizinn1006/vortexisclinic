@@ -22,7 +22,7 @@
         var st = global.VC.products.status(p);
         return (
           '<li><a href="' + global.VC.url(p.slug) + '">' + p.name +
-          (p.status === "in-development" || p.status === "available" ? "" : " <span style=\"opacity:.55\">- " + st.label + "</span>") +
+          (st.live || p.status === "in-development" ? "" : " <span style=\"opacity:.55\">- " + st.label + "</span>") +
           "</a></li>"
         );
       })

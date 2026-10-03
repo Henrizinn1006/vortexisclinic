@@ -27,6 +27,7 @@
 
 .nav { display: flex; align-items: center; gap: var(--sp-1); }
 .nav__link {
+  white-space: nowrap;
   padding: 0.5rem 0.75rem;
   border-radius: var(--r-sm);
   font-size: var(--fs-sm);
@@ -70,7 +71,7 @@
 .nav-toggle[aria-expanded="true"] span::before { top: 0; transform: rotate(45deg); }
 .nav-toggle[aria-expanded="true"] span::after { top: 0; transform: rotate(-45deg); }
 
-@media (max-width: 960px) {
+@media (max-width: 1100px) {
   .nav-toggle { display: grid; }
   .header__desktop { display: none; }
 
@@ -95,7 +96,7 @@
   .mobile-nav__actions { display: grid; gap: var(--sp-3); margin-top: var(--sp-4); }
 }
 
-@media (min-width: 961px) {
+@media (min-width: 1101px) {
   .mobile-nav { display: none; }
 }
 

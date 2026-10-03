@@ -327,6 +327,36 @@
 .cta-card p { color: rgba(255, 255, 255, 0.78); max-width: 56ch; margin-inline: auto; }
 .cta-card__actions { display: flex; flex-wrap: wrap; gap: var(--sp-3); justify-content: center; margin-top: var(--sp-5); }
 
+/* ---------------- Perguntas frequentes ----------------
+   <details> nativo: abre e fecha sem JS e funciona no teclado. */
+.faq { max-width: var(--container-narrow); margin-inline: auto; display: grid; gap: var(--sp-3); }
+.faq__item {
+  background: var(--vc-bg);
+  border: 1px solid var(--vc-border);
+  border-radius: var(--r-md);
+  transition: border-color var(--t-fast);
+}
+.faq__item[open] { border-color: var(--vc-border-strong); }
+.faq__item summary {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
+  font-weight: 600;
+  color: var(--vc-blue-dark);
+  cursor: pointer;
+  list-style: none;
+}
+.faq__item summary::-webkit-details-marker { display: none; }
+.faq__item summary::after {
+  content: "+";
+  flex: none;
+  font-size: 1.3rem; line-height: 1;
+  color: var(--accent);
+  transition: transform 320ms var(--ease-out);
+}
+.faq__item[open] summary::after { transform: rotate(45deg); }
+.faq__item summary:focus-visible { outline: 2px solid var(--vc-blue); outline-offset: 2px; border-radius: var(--r-md); }
+.faq__item p { padding: 0 var(--sp-5) var(--sp-4); margin: 0; font-size: var(--fs-sm); color: var(--vc-text-muted); }
+
 /* ---------------- Contato ---------------- */
 .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-4); }
 .contact-card { display: grid; gap: var(--sp-2); }
