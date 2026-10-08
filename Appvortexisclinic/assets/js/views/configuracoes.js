@@ -156,8 +156,9 @@
   /* ---------------- plano, limites e uso ----------------
      O uso aparece AO LADO do limite: "5 de 15" é o que ajuda a decidir;
      "limite: 15" sozinho não diz nada. Limite nulo é "sem limite" — e a
-     tela diz isso em vez de mostrar barra vazia. Não há botão de trocar
-     de plano: sem cobrança atrás, seria um "vire Pro de graça". */
+     tela diz isso em vez de mostrar barra vazia. Contratar leva à fatura
+     do Asaas; o plano só muda quando o pagamento é confirmado, e a tela
+     mostra o plano pendente enquanto isso. */
   function linhaDeLimite(rotulo, usado, limite, unidade) {
     var texto = limite === null
       ? fmt.numero(usado) + (unidade || "") + " · sem limite"
@@ -199,10 +200,77 @@
         ${linhaDeLimite(termos["client.many"] + " ativos", p.uso.pessoas, p.limites.pessoas)}
         ${linhaDeLimite("Arquivos", p.uso.armazenamentoMb, p.limites.armazenamentoMb, " MB")}
       </div>
+      ${blocoContratacao(p)}`;
+  }
+
+  function blocoContratacao(p) {
+    if (!p.cobrancaAtiva) {
+      return html`<div class="notice" style="margin-top:var(--sp-5)">
+        <div>A contratação online ainda não está disponível. Para mudar de plano,
+        fale com a Vortexis.</div></div>`;
+    }
+    return html`
+      ${p.planoPendente
+        ? html`<div class="notice" style="margin-top:var(--sp-5)">
+            <div>Aguardando o pagamento do plano <b>${p.planoPendente}</b>. Assim que
+            for confirmado, ele passa a valer.</div></div>`
+        : html.vazio}
       <div class="notice" style="margin-top:var(--sp-5)">
-        <div>Para mudar de plano, fale com a Vortexis. Mudar para um plano menor
-        <b>nunca apaga</b> nada: tudo o que já foi cadastrado continua visível.</div>
+        <div>Mudar para um plano menor <b>nunca apaga</b> nada: tudo o que já foi
+        cadastrado continua visível.</div>
+      </div>
+      <div class="row" style="justify-content:flex-end;gap:var(--sp-3);margin-top:var(--sp-4)">
+        ${p.assinaturaPaga
+          ? html`<button class="btn btn--ghost" type="button" data-acao="cancelar-assinatura">Cancelar assinatura</button>`
+          : html.vazio}
+        ${!p.assinaturaPaga && p.catalogo.length
+          ? html`<button class="btn btn--accent" type="button" data-acao="contratar-plano">Contratar plano</button>`
+          : html.vazio}
       </div>`;
+  }
+
+  var planoAtual = null;
+
+  function abrirContratacao() {
+    var opcoes = planoAtual.catalogo.map(function (c) {
+      return { valor: c.chave, rotulo: c.nome + " — " + fmt.moeda(c.precoMensal) + "/mês" };
+    });
+    VC.modal.abrir({
+      titulo: "Contratar plano",
+      subtitulo: "Você escolhe Pix, boleto ou cartão na fatura.",
+      corpo: html`
+        ${f.campo({ nome: "plano", rotulo: "Plano", tipo: "select", opcoes: opcoes,
+                    valor: opcoes[0].valor })}
+        ${f.campo({ nome: "cpfCnpj", rotulo: "CPF ou CNPJ de quem paga",
+                    dica: "Enviado ao Asaas para emitir a cobrança; não é guardado aqui." })}
+        ${f.erro("")}`,
+      confirmar: "Ir para o pagamento",
+      aoConfirmar: function (caixa) {
+        var v = f.valores(caixa);
+        f.mostrarErro(caixa, "");
+        VC.services.configuracoes.contratar(v.plano, v.cpfCnpj || "").then(function (r) {
+          VC.modal.fechar();
+          if (r.link_pagamento) {
+            VC.toast.ok("Assinatura criada", "Abrindo a fatura para pagamento");
+            global.open(r.link_pagamento, "_blank", "noopener");
+          } else {
+            VC.toast.ok("Assinatura criada", "A fatura chega por e-mail");
+          }
+          recarregarPlano();
+        }, function (erro) {
+          f.mostrarErro(caixa, erro && erro.status === 503
+            ? "A cobrança está indisponível agora. Tente novamente em instantes."
+            : f.mensagemDe(erro));
+        });
+      }
+    });
+  }
+
+  function recarregarPlano() {
+    return VC.services.configuracoes.plano().then(function (p) {
+      planoAtual = p;
+      VC.safe.render(VC.dom.el("[data-plano]"), cartaoPlano(p));
+    });
   }
 
   function render() {
@@ -246,9 +314,7 @@
     });
 
     if (podeGravar()) {
-      VC.services.configuracoes.plano().then(function (p) {
-        VC.safe.render(VC.dom.el("[data-plano]"), cartaoPlano(p));
-      }, function () {
+      recarregarPlano().then(null, function () {
         VC.safe.render(VC.dom.el("[data-plano]"), ui.vazio({
           titulo: "Não foi possível carregar o plano", texto: "Tente novamente em instantes."
         }));
@@ -293,6 +359,30 @@
         pintar(c);
       }, function (erro) {
         f.mostrarErro(escopo, f.mensagemDe(erro));
+      });
+    });
+
+    VC.dom.on(alvo, "click", '[data-acao="contratar-plano"]', function () {
+      if (planoAtual) abrirContratacao();
+    });
+
+    VC.dom.on(alvo, "click", '[data-acao="cancelar-assinatura"]', function () {
+      VC.modal.abrir({
+        titulo: "Cancelar assinatura?",
+        subtitulo: "A cobrança para. O que já foi cadastrado continua visível.",
+        cancelar: "Manter assinatura",
+        confirmar: "Cancelar assinatura",
+        aoConfirmar: function () {
+          VC.services.configuracoes.cancelarAssinatura().then(function (p) {
+            VC.modal.fechar();
+            planoAtual = p;
+            VC.safe.render(VC.dom.el("[data-plano]"), cartaoPlano(p));
+            VC.toast.ok("Assinatura cancelada", "");
+          }, function (erro) {
+            VC.modal.fechar();
+            VC.toast.erro("Não foi possível cancelar", f.mensagemDe(erro));
+          });
+        }
       });
     });
 

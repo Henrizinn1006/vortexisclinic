@@ -28,11 +28,22 @@
       return base.buscar("/workspace/settings").then(mapa.configuracao);
     },
 
-    /* Plano, limites e uso (GET /workspace/plan). Só leitura: trocar de
-       plano não tem rota — sem cobrança atrás, seria "vire Pro de graça".
-       Exige `settings.manage`; a tela só chama para quem tem. */
+    /* Plano, limites e uso (GET /workspace/plan). Exige `settings.manage`;
+       a tela só chama para quem tem. */
     plano: function () {
       return base.buscar("/workspace/plan").then(mapa.plano);
+    },
+
+    /* Contratar: o servidor cria a assinatura no Asaas e devolve o link
+       da fatura. O plano NÃO muda aqui — muda quando o pagamento for
+       confirmado. O CPF/CNPJ vai ao gateway e não é guardado. */
+    contratar: function (chave, cpfCnpj) {
+      return base.enviar("post", "/workspace/plan/checkout",
+                         { plano: chave, cpf_cnpj: cpfCnpj });
+    },
+
+    cancelarAssinatura: function () {
+      return base.enviar("post", "/workspace/plan/cancel", {}).then(mapa.plano);
     },
 
     salvar: function (dados) {

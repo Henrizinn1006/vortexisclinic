@@ -518,6 +518,14 @@
       status: traduzir(STATUS_ASSINATURA, p.status),
       vigente: !!p.vigente,
       testeAte: p.trial_ate || null,
+      periodoAte: p.periodo_ate || null,
+      planoPendente: p.plano_pendente || null,
+      cobrancaAtiva: !!p.cobranca_ativa,
+      assinaturaPaga: !!p.assinatura_paga,
+      catalogo: (p.catalogo || []).map(function (c) {
+        return { chave: c.plano, nome: c.nome, descricao: c.descricao || "",
+                 precoMensal: Number(c.preco_mensal) };
+      }),
       precoMensal: p.preco_mensal === null || p.preco_mensal === undefined
         ? null : Number(p.preco_mensal),
       limites: {

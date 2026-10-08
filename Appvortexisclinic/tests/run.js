@@ -248,6 +248,8 @@ var EQUIPE = {
 var PLANO = {
   plano: "essencial", plano_nome: "Essencial", status: "trialing", vigente: true,
   trial_ate: "2026-10-17T12:00:00", preco_mensal: null,
+  periodo_ate: null, plano_pendente: null, cobranca_ativa: true, assinatura_paga: false,
+  catalogo: [{ plano: "essencial", nome: "Essencial", descricao: "", preco_mensal: "59.90" }],
   limites: { profissionais: 5, membros: 10, clientes: 500, armazenamento_mb: null },
   recursos: { clinico: true, documentos: true, exportacao: true, lembretes: true },
   uso: { profissionais: 1, membros: 1, clientes: 498, armazenamento_mb: 12.5 }
@@ -1310,7 +1312,20 @@ grupo("Plano e uso", function () {
     ok(pagina.indexOf("498 de 500") > -1, "a tela mostra \"498 de 500\"");
     ok(pagina.indexOf("sem limite") > -1, "e diz \"sem limite\" quando não há teto");
     ok(pagina.indexOf("meter--warn") > -1, "perto do limite a barra muda de tom");
-    ok(!/data-acao="(trocar|mudar)-plano"/.test(pagina), "não há botão de trocar de plano");
+    ok(!/data-acao="(trocar|mudar)-plano"/.test(pagina), "não há botão de trocar de plano direto");
+    ok(pagina.indexOf('data-acao="contratar-plano"') > -1, "com cobrança ativa, há botão de contratar");
+    ok(pagina.indexOf('data-acao="cancelar-assinatura"') === -1, "sem assinatura paga, não há cancelar");
+    igual(p.catalogo[0].precoMensal, 59.9, "preço do catálogo vem como número");
+
+    var paga = Object.assign({}, p, { assinaturaPaga: true, planoPendente: "profissional" });
+    var pg = VC.safe.html`${VC.views.configuracoes._cartaoPlano(paga)}`.toString();
+    ok(pg.indexOf('data-acao="cancelar-assinatura"') > -1, "com assinatura paga, aparece cancelar");
+    ok(pg.indexOf('data-acao="contratar-plano"') === -1, "e some contratar");
+    ok(pg.indexOf("Aguardando o pagamento") > -1, "plano pendente é avisado");
+
+    var semGateway = Object.assign({}, p, { cobrancaAtiva: false });
+    var sg = VC.safe.html`${VC.views.configuracoes._cartaoPlano(semGateway)}`.toString();
+    ok(sg.indexOf('data-acao="contratar-plano"') === -1, "sem gateway configurado, não há botão");
 
   }).then(function () {
     SERVIDOR.ativo = "tnt_002";       // profissional: sem settings.manage
