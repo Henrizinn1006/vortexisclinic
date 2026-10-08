@@ -81,7 +81,7 @@ def test_backup_restaurado_devolve_tudo_inclusive_o_cifrado(cliente, cenario, tm
                                                              schema_garantido):
     arquivo = backup.gerar(settings, tmp_path)
     manifesto = backup.conferir(arquivo)
-    assert manifesto["versao_alembic"] == "0011_planos"
+    assert manifesto["versao_alembic"] == "0012_cobranca"
     assert manifesto["tabelas"]["clinical_note_versions"] == 1
     assert len(manifesto["arquivos"]) == 1                  # o PDF do recibo
 

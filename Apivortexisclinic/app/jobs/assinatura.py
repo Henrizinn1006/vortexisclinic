@@ -5,13 +5,9 @@ Troca o plano de uma conta.
     python -m app.jobs.assinatura --tenant <slug-ou-id-publico> --plano pro
     python -m app.jobs.assinatura --tenant <slug> --status active
 
-Isto é um comando, e não uma rota, de propósito: **enquanto não houver
-gateway de pagamento, mudar de plano é operação de fora da aplicação**.
-Uma rota de autoatendimento sem cobrança atrás seria um botão de "vire Pro
-de graça".
-
-Quando o gateway existir, quem chama isto é o webhook dele — e o comando
-continua útil para o suporte resolver o caso que o webhook não cobriu.
+Atalho do suporte, sem cobrança: serve ao caso que o checkout e o webhook
+do Asaas não cobriram (cortesia, correção). O autoatendimento é o checkout
+em `routes_billing.py`, que só troca o plano após o pagamento confirmado.
 """
 import argparse
 import sys

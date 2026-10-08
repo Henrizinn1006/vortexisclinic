@@ -1,7 +1,7 @@
 """Modelos do banco. Importar este pacote registra tudo no metadata."""
 from app.models.agenda import AppointmentSeries, ScheduleBlock  # noqa: F401
 from app.models.appointment import Appointment  # noqa: F401
-from app.models.billing import Plan, Subscription  # noqa: F401
+from app.models.billing import BillingEvent, Plan, Subscription  # noqa: F401
 from app.models.client import Client, ClientProfessional  # noqa: F401
 from app.models.clinical import (ClinicalAccessLog, ClinicalNote,  # noqa: F401
                                  ClinicalNoteVersion)

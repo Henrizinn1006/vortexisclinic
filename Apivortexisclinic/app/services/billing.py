@@ -76,12 +76,11 @@ def plano(db: Session, tenant_id: int) -> Plan:
 
 
 def trocar_plano(db: Session, tenant_id: int, chave: str, *, nota: str = "") -> Subscription:
-    """Troca o plano de uma conta.
+    """Troca o plano de uma conta, sem cobrança.
 
-    Não tem rota de propósito: enquanto não houver gateway, mudar de plano
-    é operação de fora da aplicação — `python -m app.jobs.assinatura`. Uma
-    rota de autoatendimento sem cobrança atrás seria um botão de "vire
-    Pro de graça".
+    Não tem rota de propósito: é o atalho do suporte
+    (`python -m app.jobs.assinatura`). A rota de autoatendimento é o
+    checkout, que só troca o plano depois do pagamento confirmado.
     """
     novo = db.execute(select(Plan).where(Plan.key == chave)).scalar_one_or_none()
     if novo is None:
@@ -92,6 +91,141 @@ def trocar_plano(db: Session, tenant_id: int, chave: str, *, nota: str = "") -> 
         atual.note = nota[:300]
     db.flush()
     return atual
+
+
+# ---------------- cobrança (Asaas) ----------------
+EVENTOS_PAGO = {"PAYMENT_CONFIRMED", "PAYMENT_RECEIVED"}
+EVENTOS_ATRASO = {"PAYMENT_OVERDUE"}
+EVENTOS_CANCELADO = {"SUBSCRIPTION_DELETED", "SUBSCRIPTION_INACTIVATED"}
+
+
+def iniciar_checkout(db: Session, tenant_id: int, chave: str, *, nome: str, email: str,
+                     cpf_cnpj: str) -> dict:
+    """Cria a assinatura no Asaas e devolve o link da primeira fatura.
+
+    Não muda o plano: ele fica em `pending_plan_id` até o webhook confirmar
+    o pagamento. Sem isso, abrir o checkout e não pagar daria o plano.
+    """
+    from app.models.tenant import Tenant
+    from app.services import asaas
+
+    if not asaas.ativo():
+        raise errors.ApiError(503, "cobranca_indisponivel",
+                              "A cobrança está indisponível no momento.")
+    novo = db.execute(
+        select(Plan).where(Plan.key == chave, Plan.active.is_(True))
+    ).scalar_one_or_none()
+    if novo is None:
+        raise errors.dados_invalidos(f"Plano '{chave}' não existe.")
+    if novo.monthly_price is None or novo.monthly_price <= 0:
+        raise errors.conflito("plano_sem_preco", "Este plano ainda não tem preço definido.")
+
+    atual = assinatura(db, tenant_id)
+    if atual.provider == asaas.PROVEDOR and atual.external_ref and atual.status != "canceled":
+        raise errors.conflito(
+            "assinatura_existente",
+            "Esta conta já tem uma assinatura ativa. Cancele-a antes de contratar outra.",
+        )
+
+    tenant = db.get(Tenant, tenant_id)
+    cliente_id = asaas.criar_cliente(nome=nome, email=email, cpf_cnpj=cpf_cnpj,
+                                     ref=tenant.public_id)
+    # O primeiro vencimento é amanhã: dá tempo de abrir a fatura e pagar.
+    vencimento = (agora() + timedelta(days=1)).date().isoformat()
+    ref_assinatura = asaas.criar_assinatura(
+        cliente_id=cliente_id, valor=novo.monthly_price, primeiro_vencimento=vencimento,
+        descricao=f"Vortexis Clinic — plano {novo.name}", ref=atual.public_id,
+    )
+    atual.provider = asaas.PROVEDOR
+    atual.external_ref = ref_assinatura
+    atual.pending_plan_id = novo.id
+    atual.canceled_at = None
+    db.flush()
+    return {"plano": novo.key, "link_pagamento": asaas.link_da_primeira_cobranca(ref_assinatura)}
+
+
+def cancelar_assinatura(db: Session, tenant_id: int) -> Subscription:
+    from app.services import asaas
+
+    atual = assinatura(db, tenant_id)
+    if atual.provider != asaas.PROVEDOR or not atual.external_ref or atual.status == "canceled":
+        raise errors.conflito("sem_assinatura_paga", "Não há assinatura paga para cancelar.")
+    asaas.cancelar_assinatura(atual.external_ref)
+    atual.status = "canceled"
+    atual.canceled_at = agora()
+    atual.pending_plan_id = None
+    db.flush()
+    return atual
+
+
+def _somar_mes(d):
+    from calendar import monthrange
+
+    ano, mes = (d.year + 1, 1) if d.month == 12 else (d.year, d.month + 1)
+    return d.replace(year=ano, month=mes, day=min(d.day, monthrange(ano, mes)[1]))
+
+
+def aplicar_evento_asaas(db: Session, corpo: dict) -> str:
+    """Aplica um webhook do Asaas. Devolve o que aconteceu (para o log).
+
+    Idempotente: o `id` do evento é único, então reenvio não muda nada.
+    Evento de assinatura que não conhecemos é registrado e ignorado — o
+    Asaas precisa de 200 para não pausar a fila de webhooks.
+    """
+    from datetime import date
+
+    from sqlalchemy.exc import IntegrityError
+
+    from app.models.billing import BillingEvent
+    from app.services import asaas
+
+    evento = str(corpo.get("event") or "")[:60]
+    evento_id = str(corpo.get("id") or "")[:120]
+    pagamento = corpo.get("payment") or {}
+    ref = pagamento.get("subscription") or (corpo.get("subscription") or {}).get("id")
+    if not evento or not evento_id:
+        return "ignorado: sem evento ou id"
+
+    sub = None
+    if ref:
+        sub = db.execute(
+            select(Subscription).where(Subscription.provider == asaas.PROVEDOR,
+                                       Subscription.external_ref == str(ref))
+        ).scalar_one_or_none()
+
+    try:
+        with db.begin_nested():
+            db.add(BillingEvent(provider=asaas.PROVEDOR, event_id=evento_id, event=evento,
+                                subscription_id=sub.id if sub else None))
+            db.flush()
+    except IntegrityError:
+        return "duplicado"
+
+    if sub is None:
+        return "ignorado: assinatura desconhecida"
+
+    if evento in EVENTOS_PAGO:
+        if sub.pending_plan_id:
+            sub.plan_id = sub.pending_plan_id
+            sub.pending_plan_id = None
+        sub.status = "active"
+        sub.canceled_at = None
+        try:
+            sub.current_period_end = _somar_mes(date.fromisoformat(pagamento["dueDate"]))
+        except (KeyError, ValueError, TypeError):
+            pass
+    elif evento in EVENTOS_ATRASO:
+        # Atraso não derruba um cancelamento já feito.
+        if sub.status != "canceled":
+            sub.status = "past_due"
+    elif evento in EVENTOS_CANCELADO:
+        sub.status = "canceled"
+        sub.canceled_at = sub.canceled_at or agora()
+        sub.pending_plan_id = None
+    else:
+        return "registrado: evento sem efeito"
+    db.flush()
+    return f"aplicado: {evento}"
 
 
 # ---------------- limites ----------------
@@ -203,6 +337,20 @@ def resumo(db: Session, tenant_id: int) -> dict:
         "status": a.status,
         "vigente": a.vigente,
         "trial_ate": a.trial_ends_at,
+        "periodo_ate": a.current_period_end,
+        "plano_pendente": a.pending_plan.key if a.pending_plan else None,
+        "cobranca_ativa": settings.VC_ASAAS_API_KEY != "",
+        # Há assinatura no gateway que ainda cobra: habilita "cancelar".
+        "assinatura_paga": bool(a.provider and a.external_ref and a.status != "canceled"),
+        # Só planos com preço: plano sem preço não dá para contratar.
+        "catalogo": [
+            {"plano": q.key, "nome": q.name, "descricao": q.description,
+             "preco_mensal": q.monthly_price}
+            for q in db.execute(
+                select(Plan).where(Plan.active.is_(True), Plan.monthly_price.is_not(None))
+                .order_by(Plan.sort_order)
+            ).scalars()
+        ],
         "preco_mensal": p.monthly_price,
         "limites": {
             "profissionais": p.max_professionals,

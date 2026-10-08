@@ -26,8 +26,14 @@ def _connect_args() -> dict:
     return args
 
 
+# READ COMMITTED de propósito. O padrão (REPEATABLE READ) no MariaDB 11.6+
+# vem com `innodb_snapshot_isolation=ON`: duas requisições simultâneas que
+# atualizam a mesma linha (a sessão, a cada chamada do painel) fazem a
+# segunda falhar com o erro 1020 "Record has changed since last read".
+# O painel dispara várias chamadas de uma vez, então isso virava 500.
 engine = create_engine(
     settings.database_url,
+    isolation_level="READ COMMITTED",
     echo=settings.VC_DB_ECHO,
     pool_pre_ping=True,
     pool_size=settings.VC_DB_POOL_SIZE,

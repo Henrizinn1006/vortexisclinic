@@ -7,16 +7,11 @@ Existe: o catálogo de planos, o que cada um permite, e a assinatura de
 cada conta. Existe também a checagem — criar o profissional de número 6
 num plano de 5 é recusado, com mensagem que diz o que fazer.
 
-**Não existe**: cobrança. Nenhum gateway, nenhuma chave de pagamento,
-nenhum webhook. Isso depende de uma conta de pagamento que o produto
-ainda não tem, e inventar a integração antes de saber qual gateway seria
-escrever código para jogar fora.
-
-O que está preparado é o **encaixe**: `external_ref` guarda o id da
-assinatura no gateway quando ele existir, e `status` já tem os estados
-que todo gateway usa (`trialing`, `active`, `past_due`, `canceled`).
-Trocar de plano hoje é operação de fora da aplicação — há um comando para
-isso em `app/jobs/assinatura.py`.
+Cobrança: o gateway é o Asaas (`app/services/asaas.py`). `provider` guarda
+"asaas" e `external_ref` o id da assinatura lá. `status` usa os estados que
+todo gateway usa (`trialing`, `active`, `past_due`, `canceled`) e só muda
+por webhook confirmado. O plano escolhido fica em `pending_plan_id` até o
+pagamento chegar. Suporte ainda troca plano à mão por `app/jobs/assinatura.py`.
 
 **Por que limite e não só "plano"**
 
@@ -29,7 +24,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from sqlalchemy import Boolean, Enum, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Enum, ForeignKey, Integer, String, UniqueConstraint, func
 from sqlalchemy.dialects.mysql import BIGINT, DATETIME, DECIMAL
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -107,7 +102,14 @@ class Subscription(Base, PKMixin, TimestampMixin):
 
     note: Mapped[Optional[str]] = mapped_column(String(300), nullable=True)
 
-    plan = relationship("Plan", lazy="joined")
+    # Plano escolhido e ainda não pago. Só vira `plan_id` quando o webhook
+    # confirma o pagamento.
+    pending_plan_id: Mapped[Optional[int]] = mapped_column(
+        BIGINT(unsigned=True), ForeignKey("plans.id", ondelete="SET NULL"), nullable=True
+    )
+
+    plan = relationship("Plan", lazy="joined", foreign_keys=[plan_id])
+    pending_plan = relationship("Plan", lazy="joined", foreign_keys=[pending_plan_id])
 
     @property
     def vigente(self) -> bool:
@@ -121,3 +123,21 @@ class Subscription(Base, PKMixin, TimestampMixin):
 
     def __repr__(self) -> str:
         return f"<Subscription tenant={self.tenant_id} {self.status}>"
+
+
+class BillingEvent(Base):
+    """Evento já recebido do gateway. `event_id` único = idempotência."""
+
+    __tablename__ = "billing_events"
+    __table_args__ = (UniqueConstraint("provider", "event_id"), TABLE_ARGS)
+
+    id: Mapped[int] = mapped_column(BIGINT(unsigned=True), primary_key=True, autoincrement=True)
+    provider: Mapped[str] = mapped_column(String(40), nullable=False)
+    event_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    event: Mapped[str] = mapped_column(String(60), nullable=False)
+    subscription_id: Mapped[Optional[int]] = mapped_column(
+        BIGINT(unsigned=True), ForeignKey("subscriptions.id", ondelete="SET NULL"), nullable=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DATETIME(fsp=3), server_default=func.now(3), nullable=False
+    )

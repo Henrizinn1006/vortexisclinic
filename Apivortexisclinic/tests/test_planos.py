@@ -107,9 +107,12 @@ def test_uso_vem_ao_lado_do_limite(cliente, conta):
     assert corpo["uso"]["profissionais"] == 1
 
 
-def test_preco_nasce_nulo(cliente, conta):
-    """Inventar mensalidade seria o mesmo erro de inventar prazo de retenção."""
-    assert cliente.get("/workspace/plan").json()["preco_mensal"] is None
+def test_preco_vem_do_banco_sem_inventar(cliente, db, conta):
+    """O preço é o do catálogo: nulo se não definido, nunca um valor da tela."""
+    with sem_escopo_de_tenant():
+        no_banco = db.execute(select(Plan.monthly_price).where(Plan.key == "essencial")).scalar_one()
+    esperado = None if no_banco is None else float(no_banco)
+    assert cliente.get("/workspace/plan").json()["preco_mensal"] == esperado
 
 
 def test_plano_sem_teto_responde_none_e_nao_9999(cliente, db, tenant_id):

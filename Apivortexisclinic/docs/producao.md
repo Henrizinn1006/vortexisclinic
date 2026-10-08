@@ -9,7 +9,7 @@ Para quem vai colocar a API no ar ou mantê-la rodando. Cada item tem o porquê:
 | Parte | Onde | Por quê |
 |---|---|---|
 | Site (`Sitevortexisclinic`) | Hospedagem compartilhada da Hostinger, `public_html/` | É HTML estático; o `.htaccess` já cuida de HTTPS, cabeçalhos e 404. |
-| Banco (MariaDB) | Hostinger, `u187622719_clinic` | Já existe, com a estrutura importada (versão `0011_planos`). |
+| Banco (MariaDB) | Hostinger, `u187622719_clinic` | Já existe, com a estrutura importada (versão `0011_planos` — falta aplicar a `0012_cobranca`: `alembic upgrade head`). |
 | API (`Apivortexisclinic`) | **VPS** (ainda não escolhida) | Hospedagem compartilhada não roda Python. |
 | Painel (`Appvortexisclinic`) | Mesma VPS, servido pelo nginx na **mesma origem** da API | Mesma origem dispensa CORS e mantém o cookie de sessão simples. |
 
@@ -136,9 +136,19 @@ Deixe essa janela aberta enquanto testa. A senha de root fica em `root-senha.txt
 
 ---
 
+> **Isolamento do banco:** a API usa `READ COMMITTED` (em `app/db/session.py`). No MariaDB 11.6+ o padrão faz requisições simultâneas falharem com o erro 1020 ao atualizar a sessão; não volte ao padrão.
+
 ## 9. O que ainda depende de decisão
 
-- **Cobrança:** gateway não escolhido. `subscriptions.provider` e `external_ref` são o encaixe; preços nascem nulos. Trocar de plano hoje é `python -m app.jobs.assinatura --tenant <slug> --plano <chave>`.
+- **Cobrança (Asaas):** integrada, falta configurar. No painel do Asaas: gere a chave de API (`VC_ASAAS_API_KEY`), cadastre o webhook em `https://<api>/billing/asaas/webhook` com um token à sua escolha (`VC_ASAAS_WEBHOOK_TOKEN`; marque os eventos de cobrança e de assinatura) e use `VC_ASAAS_BASE_URL=https://api.asaas.com/v3` em produção (o padrão é o sandbox, e a API recusa subir em produção com sandbox ou sem token). **Os preços dos planos nascem nulos** e o checkout recusa plano sem preço: defina (valores sugeridos, ajuste à vontade):
+
+  ```sql
+  UPDATE plans SET monthly_price = 59.90 WHERE `key` = 'essencial';
+  UPDATE plans SET monthly_price = 79.90 WHERE `key` = 'profissional';
+  UPDATE plans SET monthly_price = 99.90 WHERE `key` = 'clinica';
+  ```
+
+  O Asaas recusa cobrança abaixo de R$ 5,00. Fluxo: `POST /workspace/plan/checkout` cria a assinatura no Asaas e devolve o link da fatura; o plano só muda quando o webhook de pagamento confirmado chega. Cancelar: `POST /workspace/plan/cancel`. Troca manual pelo suporte continua: `python -m app.jobs.assinatura --tenant <slug> --plano <chave>`.
 - **Prazo de retenção do prontuário:** não inventar. A política nasce vazia e recusa prazo sem base legal.
 - **SMTP:** sem credencial, o e-mail fica na fila.
 - **VPS, domínio da API e certificado.**

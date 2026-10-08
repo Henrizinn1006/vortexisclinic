@@ -84,6 +84,16 @@ class Settings(BaseSettings):
     # regra legal: ajuste quando decidir. 0 = sem prazo de teste.
     VC_TRIAL_DAYS: int = 14
 
+    # ---------------- Cobrança (Asaas) ----------------
+    # Sem chave, a cobrança fica desligada: o checkout responde "indisponível"
+    # e o webhook recusa tudo. Sandbox: https://api-sandbox.asaas.com/v3
+    VC_ASAAS_API_KEY: str = ""
+    VC_ASAAS_BASE_URL: str = "https://api-sandbox.asaas.com/v3"
+    # Token que o Asaas devolve no cabeçalho `asaas-access-token` de cada
+    # webhook. É o que separa o Asaas de qualquer um que descubra a URL.
+    VC_ASAAS_WEBHOOK_TOKEN: str = ""
+    VC_ASAAS_TIMEOUT_S: int = 15
+
     # ---------------- E-mail ----------------
     # Desligado por padrão: sem SMTP configurado, a mensagem é enfileirada
     # e fica visível na fila em vez de sumir. Em desenvolvimento, o backend
@@ -153,6 +163,10 @@ class Settings(BaseSettings):
             # Sem chave, o prontuário seria gravado com a chave de
             # desenvolvimento — que está no código. Não sobe assim.
             problemas.append("VC_CLINICAL_KEYS é obrigatório em produção")
+        if self.VC_ASAAS_API_KEY and not self.VC_ASAAS_WEBHOOK_TOKEN:
+            problemas.append("VC_ASAAS_WEBHOOK_TOKEN é obrigatório quando há VC_ASAAS_API_KEY")
+        if self.VC_ASAAS_API_KEY and "sandbox" in self.VC_ASAAS_BASE_URL:
+            problemas.append("VC_ASAAS_BASE_URL aponta para o sandbox em produção")
         if problemas:
             raise RuntimeError("Configuração inválida para produção: " + "; ".join(problemas))
 
