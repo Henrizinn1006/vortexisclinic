@@ -1,0 +1,16 @@
+# /etc/systemd/system/vortexis-api.service
+[Unit]
+Description=Vortexis Clinic API
+After=network.target
+
+[Service]
+User=vortexis
+WorkingDirectory=/srv/vortexis/Apivortexisclinic
+# Trava de boot: com qualquer FALHA a API não sobe.
+ExecStartPre=/srv/vortexis/Apivortexisclinic/.venv/bin/python scripts/verificar_producao.py
+ExecStart=/srv/vortexis/Apivortexisclinic/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1 --proxy-headers --forwarded-allow-ips 127.0.0.1
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

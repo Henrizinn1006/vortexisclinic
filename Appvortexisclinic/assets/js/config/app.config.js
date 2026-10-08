@@ -24,7 +24,11 @@
       /* Pode ser trocado sem editar código: basta declarar
          window.VC_API_BASE antes dos scripts (útil em produção,
          onde API e painel ficam na mesma origem: ""). */
-      base: (typeof global.VC_API_BASE === "string" ? global.VC_API_BASE : "http://127.0.0.1:8000"),
+      base: (typeof global.VC_API_BASE === "string" ? global.VC_API_BASE
+        /* Sem declaração explícita: em localhost a API fica na :8000;
+           em qualquer outro endereço (produção) é a mesma origem. */
+        : (/^(localhost|127\.0\.0\.1)$/.test(global.location && global.location.hostname)
+            ? "http://127.0.0.1:8000" : "")),
       cookieCsrf: "vc_csrf",
 
       /* Tudo vem da API: identidade, pessoas, agenda, atendimentos,
