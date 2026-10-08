@@ -2,7 +2,7 @@
 
 Para colocar API e painel no ar numa VPS Ubuntu. Detalhes e porquês de cada variável: [producao.md](producao.md). Os arquivos de configuração estão em [../deploy/](../deploy/).
 
-Troque `SEUDOMINIO.com.br` pelo seu domínio em todos os comandos.
+O painel e a API ficam em `app.vortexisclinic.com.br`; o site institucional continua na hospedagem compartilhada, em `vortexisclinic.com.br`.
 
 ---
 
@@ -18,7 +18,7 @@ No hPanel, em **Domínios → DNS**, crie um registro:
 |---|---|---|
 | A | `app` | IP da VPS |
 
-Leva alguns minutos para propagar. Confira com `ping app.SEUDOMINIO.com.br`.
+Leva alguns minutos para propagar. Confira com `ping app.vortexisclinic.com.br`.
 
 ## 3. Liberar a VPS no banco
 
@@ -33,13 +33,46 @@ apt update && apt upgrade -y
 apt install -y python3-venv python3-pip nginx certbot python3-certbot-nginx git ufw
 ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw --force enable
 
-adduser --system --group --home /srv/vortexis vortexis
-mkdir -p /srv/vortexis/arquivos /srv/vortexis/backups
+adduser --system --group --home /home/vortexis vortexis
 ```
 
 ## 5. Levar o código
 
-Copie o repositório para `/srv/vortexis` (por `git clone` se estiver num repositório remoto, ou `scp -r`). Devem existir `/srv/vortexis/Apivortexisclinic` e `/srv/vortexis/Appvortexisclinic`.
+Use `git clone`: é o que torna cada atualização futura um `git pull`. O repositório é `https://github.com/Henrizinn1006/vortexisclinic.git`.
+
+**Se o repositório for público:**
+
+```bash
+cd /srv
+git clone https://github.com/Henrizinn1006/vortexisclinic.git vortexis
+```
+
+**Se for privado** (recomendado, pois há código de saúde), use uma *deploy key*, que dá à VPS acesso só de leitura a este repositório:
+
+```bash
+ssh-keygen -t ed25519 -f /root/.ssh/vortexis_deploy -N ""
+cat /root/.ssh/vortexis_deploy.pub        # copie a linha que aparecer
+```
+
+No GitHub: repositório → **Settings → Deploy keys → Add deploy key**, cole a linha e deixe **sem** marcar "Allow write access". Depois:
+
+```bash
+printf 'Host github.com
+  IdentityFile /root/.ssh/vortexis_deploy
+  IdentitiesOnly yes
+' >> /root/.ssh/config
+cd /srv
+git clone git@github.com:Henrizinn1006/vortexisclinic.git vortexis
+```
+
+Devem existir `/srv/vortexis/Apivortexisclinic` e `/srv/vortexis/Appvortexisclinic`.
+
+Crie as pastas de dados e libere o repositório para o `git pull` do root:
+
+```bash
+mkdir -p /srv/vortexis/arquivos /srv/vortexis/backups
+git config --global --add safe.directory /srv/vortexis
+```
 
 ```bash
 cd /srv/vortexis/Apivortexisclinic
@@ -66,7 +99,7 @@ VC_DB_NAME=u187622719_clinic
 VC_DB_USER=u187622719_clinic
 VC_DB_PASSWORD=<a senha do banco>
 VC_CORS_ORIGINS=
-VC_PANEL_URL=https://app.SEUDOMINIO.com.br
+VC_PANEL_URL=https://app.vortexisclinic.com.br
 VC_FILES_DIR=/srv/vortexis/arquivos
 VC_CLINICAL_KEYS=1:<chave>
 VC_CLINICAL_KEY_VERSION=1
@@ -127,20 +160,20 @@ Se não subir: `journalctl -u vortexis-api -n 50`.
 
 ```bash
 cp /srv/vortexis/Apivortexisclinic/deploy/nginx-vortexis.conf /etc/nginx/sites-available/vortexis
-nano /etc/nginx/sites-available/vortexis      # troque SEUDOMINIO.com.br
+nano /etc/nginx/sites-available/vortexis      # confira o domínio
 ln -s /etc/nginx/sites-available/vortexis /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 
-certbot --nginx -d app.SEUDOMINIO.com.br      # certificado gratuito, renova sozinho
+certbot --nginx -d app.vortexisclinic.com.br      # certificado gratuito, renova sozinho
 ```
 
-Abra `https://app.SEUDOMINIO.com.br`: a tela de entrada deve aparecer, e o cadastro deve funcionar.
+Abra `https://app.vortexisclinic.com.br`: a tela de entrada deve aparecer, e o cadastro deve funcionar.
 
 ## 11. Asaas
 
 1. Em **Integrações → Webhooks → Criar**, informe:
-   - URL: `https://app.SEUDOMINIO.com.br/billing/asaas/webhook`
+   - URL: `https://app.vortexisclinic.com.br/billing/asaas/webhook`
    - Token: o mesmo `VC_ASAAS_WEBHOOK_TOKEN` do `.env`
    - Eventos: os de cobrança (pagamentos) e os de assinatura
 2. Para testar antes de usar dinheiro de verdade, faça uma vez com a chave e a URL do **sandbox** (`https://api-sandbox.asaas.com/v3`) apontando para esta mesma VPS. Assine, pague a fatura de teste e veja o plano mudar sozinho. Depois volte para a chave de produção.
@@ -166,7 +199,8 @@ E mantenha uma cópia fora da VPS (o snapshot da própria Hostinger ajuda, mas n
 ```bash
 cd /srv/vortexis/Apivortexisclinic
 .venv/bin/python scripts/backup.py gerar
-git pull                                  # ou copie os arquivos novos
+git pull
+chown -R vortexis:vortexis /srv/vortexis
 .venv/bin/pip install -r requirements.txt
 .venv/bin/python -m alembic upgrade head  # só se houver migration nova
 systemctl restart vortexis-api
